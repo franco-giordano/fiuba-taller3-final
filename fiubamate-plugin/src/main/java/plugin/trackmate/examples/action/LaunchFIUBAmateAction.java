@@ -7,9 +7,10 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.action.TrackMateAction;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import plugin.trackmate.examples.view.EventLoggerView;
+// import plugin.trackmate.examples.view.EventLoggerView;
+import plugin.trackmate.examples.view.FIUBAmateView;
 
-public class LaunchEventLoggerAction implements TrackMateAction
+public class LaunchFIUBAmateAction implements TrackMateAction
 {
 
 	private Logger logger;
@@ -17,10 +18,11 @@ public class LaunchEventLoggerAction implements TrackMateAction
 	@Override
 	public void execute( final TrackMate trackmate, final SelectionModel selectionModel, final DisplaySettings displaySettings, final Frame parent )
 	{
-		logger.log( "Launching a new event logger..." );
-		final EventLoggerView view = new EventLoggerView( trackmate.getModel(), selectionModel );
+		logger.log("Lanzando FIUBAmate...");
+		// final EventLoggerView view = new EventLoggerView( trackmate.getModel(), selectionModel );
+		final FIUBAmateView view = new FIUBAmateView(trackmate.getModel(), selectionModel, displaySettings);
 		view.render();
-		logger.log( " Done.\n" );
+		logger.log(" Listo!\n");
 	}
 
 	@Override

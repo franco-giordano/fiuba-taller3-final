@@ -13,6 +13,11 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import ij.IJ;
+import ij.gui.RoiListener;
+import ij.ImagePlus;
+import ij.gui.Roi;
+import java.awt.Point;
+
 
 public class EventLoggerView implements TrackMateModelView, ModelChangeListener, SelectionChangeListener
 {
@@ -31,6 +36,23 @@ public class EventLoggerView implements TrackMateModelView, ModelChangeListener,
 		this.selectionModel = selectionModel;
 
 		IJ.log("Bienvenido a FIUBAmate");
+		ImagePlus imp = IJ.getImage();
+		IJ.log(imp.getInfoProperty());
+		IJ.log(imp.getTitle());
+
+		Roi roi = imp.getRoi();
+
+		if (roi == null) {
+			IJ.log("ROI nulo :(\n");
+			return;
+		}
+		IJ.log("DEBUG INFO: " + roi.getDebugInfo() + "\n");
+		IJ.log("PROPS: " + roi.getProperties() + "\n");
+		
+		for (Point p : roi) {
+			// process p
+			IJ.log(p.toString());
+		}
 	}
 
 	@Override
@@ -83,7 +105,7 @@ public class EventLoggerView implements TrackMateModelView, ModelChangeListener,
 	public String getKey()
 	{
 		// This MUST be the same key that for the facory of this view.
-		return EventLoggerViewFactory.KEY;
+		return "EVENT_LOGGER";
 	}
 
 	/*
@@ -178,4 +200,9 @@ public class EventLoggerView implements TrackMateModelView, ModelChangeListener,
 
 		IJ.log( str.toString() );
 	}
+
+	// @Override
+	// public void roiModified​(ImagePlus imp, int id) {
+	// 	IJ.log("Cambio el ROI! \n");
+	// }
 }

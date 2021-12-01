@@ -1,7 +1,10 @@
 @echo off
 echo ### Comenzando...
 cd fiubamate-plugin
+@REM call mvn clean
 call mvn
+echo ### Maven Exit Code = %ERRORLEVEL%
+if not "%ERRORLEVEL%" == "0" exit /b
 echo ### Termino compilacion
 cd ..
 echo ### Copiando plugin compilado...

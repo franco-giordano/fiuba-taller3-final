@@ -13,12 +13,12 @@ import ij.ImageJ;
 import ij.ImagePlus;
 
 @Plugin( type = TrackMateActionFactory.class )
-public class LaunchEventLoggerActionFactory implements TrackMateActionFactory
+public class LaunchFIUBAmateActionFactory implements TrackMateActionFactory
 {
 
-	private static final String INFO_TEXT = "<html>This action will launch a new event logger, that uses the ImageJ log window to append TrackMate events.</html>";
+	private static final String INFO_TEXT = "<html>Esta accion lanza FIUBAmate, un sistema integrado a ImageJ pensado para obtener estadisticas sobre distintos canales y cuerpos en una experiencia dada.</html>";
 
-	private static final String KEY = "LAUNCH_EVENT_LOGGER";
+	private static final String KEY = "LAUNCH_FIUBAMATE";
 
 	private static final String NAME = "Lanzar FIUBAmate";
 
@@ -49,7 +49,7 @@ public class LaunchEventLoggerActionFactory implements TrackMateActionFactory
 	@Override
 	public TrackMateAction create()
 	{
-		return new LaunchEventLoggerAction();
+		return new LaunchFIUBAmateAction();
 	}
 
 	public static void main( final String[] args )
