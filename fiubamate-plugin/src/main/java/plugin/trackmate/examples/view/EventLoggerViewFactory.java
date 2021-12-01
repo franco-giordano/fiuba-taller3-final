@@ -4,6 +4,8 @@ import javax.swing.ImageIcon;
 
 import org.scijava.plugin.Plugin;
 
+import static fiji.plugin.trackmate.gui.Icons.CALCULATOR_ICON;
+
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
@@ -31,7 +33,7 @@ public class EventLoggerViewFactory implements ViewFactory
 	@Override
 	public ImageIcon getIcon()
 	{
-		return null;
+		return CALCULATOR_ICON;
 	}
 
 	@Override

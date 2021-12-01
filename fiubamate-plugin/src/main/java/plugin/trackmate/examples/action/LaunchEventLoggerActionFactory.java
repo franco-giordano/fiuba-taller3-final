@@ -4,6 +4,8 @@ import javax.swing.ImageIcon;
 
 import org.scijava.plugin.Plugin;
 
+import static fiji.plugin.trackmate.gui.Icons.CALCULATOR_ICON;
+
 import fiji.plugin.trackmate.TrackMatePlugIn;
 import fiji.plugin.trackmate.action.TrackMateAction;
 import fiji.plugin.trackmate.action.TrackMateActionFactory;
@@ -18,7 +20,7 @@ public class LaunchEventLoggerActionFactory implements TrackMateActionFactory
 
 	private static final String KEY = "LAUNCH_EVENT_LOGGER";
 
-	private static final String NAME = "Launch the event logger";
+	private static final String NAME = "Lanzar FIUBAmate";
 
 	@Override
 	public String getInfoText()
@@ -29,7 +31,7 @@ public class LaunchEventLoggerActionFactory implements TrackMateActionFactory
 	@Override
 	public ImageIcon getIcon()
 	{
-		return null; // No icon for this one.
+		return CALCULATOR_ICON;
 	}
 
 	@Override
