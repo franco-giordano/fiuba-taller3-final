@@ -52,8 +52,14 @@ import fiji.plugin.trackmate.visualization.trackscheme.utils.SearchBar;
 import fiji.plugin.trackmate.visualization.table.TablePanel;
 import fiji.plugin.trackmate.visualization.table.TrackTableView;
 
+import ij.IJ;
+import ij.ImagePlus;
+import ij.gui.RoiListener;
+import ij.gui.Roi;
+import java.awt.Rectangle;
 
-public class FIUBAmateView extends JFrame implements TrackMateModelView, ModelChangeListener, SelectionChangeListener
+
+public class FIUBAmateView extends JFrame implements TrackMateModelView, ModelChangeListener, SelectionChangeListener, RoiListener
 {
 
 	private static final long serialVersionUID = 1L;
@@ -73,6 +79,8 @@ public class FIUBAmateView extends JFrame implements TrackMateModelView, ModelCh
 	public FIUBAmateView( final Model model, final SelectionModel selectionModel, final DisplaySettings ds )
 	{
 		super( "FIUBAmate" );
+		IJ.log("Inicio!");
+		IJ.log("Cantidad de Tracks distintos en el modelo: " + model.getTrackModel().trackIDs(false).size());
 		setIconImage( TRACKMATE_ICON.getImage() );
 		this.model = model;
 		this.selectionModel = selectionModel;
@@ -132,6 +140,7 @@ public class FIUBAmateView extends JFrame implements TrackMateModelView, ModelCh
 				ds.listeners().remove( refresher );
 			};
 		} );
+		Roi.addRoiListener(this);
 	}
 
 	public void exportToCsv()
@@ -325,6 +334,36 @@ public class FIUBAmateView extends JFrame implements TrackMateModelView, ModelCh
 	@Override
 	public void clear()
 	{}
+
+
+	public  void roiModified(ImagePlus img, int id) {
+		String type = "UNKNOWN";
+		switch (id) {
+			case CREATED: type="CREATED"; break;
+			case MOVED: type="MOVED"; break;
+			case MODIFIED: type="MODIFIED"; break;
+			case EXTENDED: type="EXTENDED"; break;
+			case COMPLETED: type="COMPLETED"; break;
+			case DELETED: type="DELETED"; break;
+		}
+		IJ.log("ROI modified: "+(img!=null?img.getTitle():"")+", "+type);
+		
+		Roi roi = img.getRoi();
+		if (roi == null) {
+			IJ.log("ROI nulo :(\n");
+			return;
+		}
+
+		// ambos printean null:
+		// IJ.log("DEBUG INFO: " + roi.getDebugInfo() + "\n");
+		// IJ.log("PROPS: " + roi.getProperties() + "\n");
+		
+		// for (Point p : roi) {
+		// 	// process p
+		// 	IJ.log(p.toString());
+		// }
+		IJ.log(roi.getBounds().toString());
+	}
 
 	/**
 	 * Forward spot table selection to selection model.
