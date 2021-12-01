@@ -13,16 +13,16 @@
 	</parent>
 
 	<groupId>sc.fiji</groupId>
-	<artifactId>TrackMate_examples</artifactId>
-	<version>2.0.0-SNAPSHOT</version>
+	<artifactId>FIUBAmate</artifactId>
+	<version>1.0.0</version>
 
-	<name>TrackMate examples</name>
-	<description>A Maven project with the bare structure to hold TrackMate modules.</description>
-	<url>https://imagej.net/TrackMate_examples</url>
-	<inceptionYear>2014</inceptionYear>
+	<name>FIUBAmate</name>
+	<description>Sistema de Deteccion y Seguimiento de Cuerpos para el Grupo de Medios Porosos, FIUBA.</description>
+	<url>https://github.com/franco-giordano/fiuba-taller3-final/</url>
+	<inceptionYear>2021</inceptionYear>
 	<organization>
-		<name>Fiji</name>
-		<url>https://fiji.sc/</url>
+		<name>FIUBA</name>
+		<url>https://fi.uba.ar/</url>
 	</organization>
 	<licenses>
 		<license>
@@ -34,25 +34,19 @@
 
 	<developers>
 		<developer>
-			<id>tinevez</id>
-			<name>Jean-Yves Tinevez</name>
-			<url>https://imagej.net/User:JeanYvesTinevez</url>
+			<id>franco-giordano</id>
+			<name>Franco Giordano</name>
+			<url>https://github.com/franco-giordano</url>
 			<roles>
-				<role>founder</role>
-				<role>lead</role>
 				<role>developer</role>
-				<role>debugger</role>
-				<role>reviewer</role>
-				<role>support</role>
-				<role>maintainer</role>
 			</roles>
 		</developer>
 		<developer>
-			<id>ctrueden</id>
-			<name>Curtis Rueden</name>
-			<url>https://imagej.net/User:Rueden</url>
+			<id>julianferres</id>
+			<name>Julian Ferres</name>
+			<url>https://github.com/julianferres</url>
 			<roles>
-				<role>maintainer</role>
+				<role>developer</role>
 			</roles>
 		</developer>
 	</developers>
@@ -62,11 +56,6 @@
 			<url>https://imagej.net/User:Schindelin</url>
 			<roles><role>founder</role></roles>
 			<properties><id>dscho</id></properties>
-		</contributor>
-		<contributor>
-			<name>Mark Hiner</name>
-			<url>https://imagej.net/User:Hinerm</url>
-			<properties><id>hinerm</id></properties>
 		</contributor>
 	</contributors>
 
