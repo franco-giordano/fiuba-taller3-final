@@ -12,9 +12,8 @@ import fiji.plugin.trackmate.action.TrackMateActionFactory;
 import ij.ImageJ;
 import ij.ImagePlus;
 
-@Plugin( type = TrackMateActionFactory.class )
-public class LaunchFIUBAmateActionFactory implements TrackMateActionFactory
-{
+@Plugin(type = TrackMateActionFactory.class)
+public class LaunchFIUBAmateActionFactory implements TrackMateActionFactory {
 
 	private static final String INFO_TEXT = "<html>Esta accion lanza FIUBAmate, un sistema integrado a ImageJ pensado para obtener estadisticas sobre distintos canales y cuerpos en una experiencia dada.</html>";
 
@@ -23,39 +22,33 @@ public class LaunchFIUBAmateActionFactory implements TrackMateActionFactory
 	private static final String NAME = "Lanzar FIUBAmate";
 
 	@Override
-	public String getInfoText()
-	{
+	public String getInfoText() {
 		return INFO_TEXT;
 	}
 
 	@Override
-	public ImageIcon getIcon()
-	{
+	public ImageIcon getIcon() {
 		return CALCULATOR_ICON;
 	}
 
 	@Override
-	public String getKey()
-	{
+	public String getKey() {
 		return KEY;
 	}
 
 	@Override
-	public String getName()
-	{
+	public String getName() {
 		return NAME;
 	}
 
 	@Override
-	public TrackMateAction create()
-	{
+	public TrackMateAction create() {
 		return new LaunchFIUBAmateAction();
 	}
 
-	public static void main( final String[] args )
-	{
-		ImageJ.main( args );
-		new ImagePlus( "samples/FakeTracks.tif" ).show();
-		new TrackMatePlugIn().run( "" );
+	public static void main(final String[] args) {
+		ImageJ.main(args);
+		new ImagePlus("samples/FakeTracks.tif").show();
+		new TrackMatePlugIn().run("");
 	}
 }
