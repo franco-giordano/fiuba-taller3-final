@@ -20,7 +20,7 @@ public class LaunchFIUBAmateAction implements TrackMateAction {
 		logger.log("Lanzando FIUBAmate...");
 		// final EventLoggerView view = new EventLoggerView( trackmate.getModel(),
 		// selectionModel );
-		final FIUBAmateView view = new FIUBAmateView(trackmate.getModel(), selectionModel, displaySettings);
+		final FIUBAmateView view = new FIUBAmateView(trackmate.getModel(), selectionModel);
 		view.render();
 		logger.log(" Listo!\n");
 	}
