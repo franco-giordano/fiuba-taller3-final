@@ -29,6 +29,8 @@ import javax.swing.border.LineBorder;
 import java.awt.BorderLayout;
 import java.awt.event.WindowAdapter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +38,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import com.opencsv.CSVWriter;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.ModelChangeEvent;
@@ -160,7 +164,8 @@ public class FIUBAmateView extends JFrame
 
 		// final JCheckBox chkboxDisplaySpotsAsRois = new JCheckBox();
 		// chkboxDisplaySpotsAsRois.setText("as ROIs");
-		// final GridBagConstraints gbcChkboxDisplaySpotsAsRois = new GridBagConstraints();
+		// final GridBagConstraints gbcChkboxDisplaySpotsAsRois = new
+		// GridBagConstraints();
 		// gbcChkboxDisplaySpotsAsRois.insets = new Insets(0, 0, 0, 5);
 		// gbcChkboxDisplaySpotsAsRois.anchor = GridBagConstraints.EAST;
 		// gbcChkboxDisplaySpotsAsRois.gridx = 1;
@@ -168,7 +173,8 @@ public class FIUBAmateView extends JFrame
 		// add(chkboxDisplaySpotsAsRois, gbcChkboxDisplaySpotsAsRois);
 		// chkboxDisplaySpotsAsRois.setFont(FONT);
 		// chkboxDisplaySpotsAsRois
-		// 		.addActionListener(e -> ds.setSpotDisplayedAsRoi(chkboxDisplaySpotsAsRois.isSelected()));
+		// .addActionListener(e ->
+		// ds.setSpotDisplayedAsRoi(chkboxDisplaySpotsAsRois.isSelected()));
 		// chkboxDisplaySpotsAsRois.setSelected(ds.isSpotDisplayedAsRoi());
 
 		/*
@@ -197,9 +203,9 @@ public class FIUBAmateView extends JFrame
 		// gbcLblSpotRadius.gridx = 0;
 		// gbcLblSpotRadius.gridy = 0;
 		// panelSpotOptions.add(lblSpotRadius, gbcLblSpotRadius);
-		
+
 		btnAgregarArea = new JButton("Agregar Area", ADD_ICON);
-		btnAgregarArea.addActionListener( e -> onAgregarArea() );
+		btnAgregarArea.addActionListener(e -> onAgregarArea());
 		btnAgregarArea.setEnabled(false);
 
 		final GridBagConstraints gbcbtnAgregarArea = new GridBagConstraints();
@@ -210,8 +216,8 @@ public class FIUBAmateView extends JFrame
 		panelSpotOptions.add(btnAgregarArea, gbcbtnAgregarArea);
 
 		final JButton btnExportarCSV = new JButton("Exportar a CSV", CSV_ICON);
-		btnExportarCSV.addActionListener( e -> IJ.log("apretaron exportar csv") );
-		btnExportarCSV.setEnabled(false);
+		btnExportarCSV.addActionListener(e -> onExportarCSV());
+		btnExportarCSV.setEnabled(true);
 
 		final GridBagConstraints gbcbtnExportarCSV = new GridBagConstraints();
 		gbcbtnExportarCSV.anchor = GridBagConstraints.EAST;
@@ -288,7 +294,7 @@ public class FIUBAmateView extends JFrame
 		exportToCsv(selectedFile);
 	}
 
-	public void exportToCsv(final String csvFile) {
+	public void exportToCsv(final String csvFile)  {
 		// try
 		// {
 		// spotTable.exportToCsv( new File( csvFile ) );
@@ -298,6 +304,17 @@ public class FIUBAmateView extends JFrame
 		// model.getLogger().error( "Problem exporting to file "
 		// + csvFile + "\n" + e.getMessage() );
 		// }
+
+		try (CSVWriter writer = new CSVWriter(new FileWriter(csvFile),
+				CSVWriter.DEFAULT_SEPARATOR,
+				CSVWriter.NO_QUOTE_CHARACTER,
+				CSVWriter.DEFAULT_ESCAPE_CHARACTER,
+				CSVWriter.DEFAULT_LINE_END)) {
+			writer.writeNext(new String[] { "Primer csv :)" });
+		} catch (final IOException e) {
+			model.getLogger().error("Problem exporting to file "
+					+ csvFile + "\n" + e.getMessage());
+		}
 	}
 
 	// public static final TablePanel< Spot > createSpotTable( final Model model,
@@ -507,6 +524,12 @@ public class FIUBAmateView extends JFrame
 		// IJ.log(p.toString());
 		// }
 		IJ.log(roi.getBounds().toString());
+	}
+
+
+	private void onExportarCSV() {
+		IJ.log("Exportando CSV");
+		exportToCsv();
 	}
 
 	/**
