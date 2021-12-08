@@ -9,8 +9,6 @@ import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
 import static fiji.plugin.trackmate.gui.Fonts.FONT;
 import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
 
-import fiji.plugin.trackmate.gui.GuiUtils;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -18,8 +16,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -27,31 +23,20 @@ import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
 import java.awt.BorderLayout;
-import java.awt.event.WindowAdapter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.opencsv.CSVWriter;
 
 import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.ModelChangeEvent;
-import fiji.plugin.trackmate.ModelChangeListener;
-import fiji.plugin.trackmate.SelectionChangeEvent;
-import fiji.plugin.trackmate.SelectionChangeListener;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.UpdateListener;
 import fiji.plugin.trackmate.util.FileChooser;
 import fiji.plugin.trackmate.util.FileChooser.DialogType;
 import fiji.plugin.trackmate.util.FileChooser.SelectionMode;
@@ -64,7 +49,7 @@ import ij.gui.RoiListener;
 import ij.gui.Roi;
 
 public class FIUBAmateView extends JFrame
-		implements TrackMateModelView, ModelChangeListener, SelectionChangeListener, RoiListener {
+		implements TrackMateModelView, RoiListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -79,19 +64,24 @@ public class FIUBAmateView extends JFrame
 	// private final TablePanel< Spot > spotTable;
 	private Roi roi = null;
 
-	private final AtomicBoolean ignoreSelectionChange = new AtomicBoolean(false);
+	// private final AtomicBoolean ignoreSelectionChange = new AtomicBoolean(false);
 
-	private final SelectionModel selectionModel;
+	// private final SelectionModel selectionModel;
 
 	private final JButton btnAgregarArea;
+	private final JButton btnExportarCSV;
 
-	public FIUBAmateView(final Model model, final SelectionModel selectionModel, final DisplaySettings ds) {
+	private List<Roi> addedAreas = new ArrayList<Roi>();
+
+	private JLabel lblAmountAreasAdded;
+
+	public FIUBAmateView(final Model model, final SelectionModel selectionModel) {
 		super("FIUBAmate");
 		IJ.log("Inicio!");
 		IJ.log("Cantidad de Tracks distintos en el modelo: " + model.getTrackModel().trackIDs(false).size());
 		setIconImage(TRACKMATE_ICON.getImage());
 		this.model = model;
-		this.selectionModel = selectionModel;
+		// this.selectionModel = selectionModel;
 
 		/*
 		 * GUI.
@@ -212,19 +202,19 @@ public class FIUBAmateView extends JFrame
 		btnAgregarArea.setEnabled(false);
 
 		final GridBagConstraints gbcbtnAgregarArea = new GridBagConstraints();
-		gbcbtnAgregarArea.anchor = GridBagConstraints.EAST;
+		gbcbtnAgregarArea.anchor = GridBagConstraints.CENTER;
 		gbcbtnAgregarArea.insets = new Insets(5, 5, 2, 5);
 		gbcbtnAgregarArea.gridx = 0;
 		gbcbtnAgregarArea.gridy = 0;
 		panelSpotOptions.add(btnAgregarArea, gbcbtnAgregarArea);
 
-		final JButton btnExportarCSV = new JButton("Exportar a CSV", CSV_ICON);
+		btnExportarCSV = new JButton("Exportar a CSV", CSV_ICON);
 		btnExportarCSV.addActionListener(e -> onExportarCSV());
-		btnExportarCSV.setEnabled(true);
+		btnExportarCSV.setEnabled(false);
 
 		final GridBagConstraints gbcbtnExportarCSV = new GridBagConstraints();
-		gbcbtnExportarCSV.anchor = GridBagConstraints.EAST;
-		gbcbtnExportarCSV.insets = new Insets(2, 5, 5, 5);
+		gbcbtnExportarCSV.anchor = GridBagConstraints.CENTER;
+		gbcbtnExportarCSV.insets = new Insets(2, 5, 2, 5);
 		gbcbtnExportarCSV.gridx = 0;
 		gbcbtnExportarCSV.gridy = 1;
 		panelSpotOptions.add(btnExportarCSV, gbcbtnExportarCSV);
@@ -242,14 +232,14 @@ public class FIUBAmateView extends JFrame
 		// gbcFtfSpotRadius.gridy = 0;
 		// panelSpotOptions.add(ftfSpotRadius, gbcFtfSpotRadius);
 
-		// final JLabel lblSpotName = new JLabel("Display spot names:");
-		// lblSpotName.setFont(SMALL_FONT);
-		// final GridBagConstraints gbcLblSpotName = new GridBagConstraints();
-		// gbcLblSpotName.anchor = GridBagConstraints.EAST;
-		// gbcLblSpotName.insets = new Insets(0, 0, 0, 5);
-		// gbcLblSpotName.gridx = 0;
-		// gbcLblSpotName.gridy = 1;
-		// panelSpotOptions.add(lblSpotName, gbcLblSpotName);
+		lblAmountAreasAdded = new JLabel("Cantidad de areas agregadas: " + addedAreas.size());
+		lblAmountAreasAdded.setFont(SMALL_FONT);
+		final GridBagConstraints gbclblAmountAreasAdded = new GridBagConstraints();
+		gbclblAmountAreasAdded.anchor = GridBagConstraints.CENTER;
+		gbclblAmountAreasAdded.insets = new Insets(2, 5, 5, 5);
+		gbclblAmountAreasAdded.gridx = 0;
+		gbclblAmountAreasAdded.gridy = 2;
+		panelSpotOptions.add(lblAmountAreasAdded, gbclblAmountAreasAdded);
 
 		// final JCheckBox chkboxSpotNames = new JCheckBox();
 		// final GridBagConstraints gbcChkboxSpotNames = new GridBagConstraints();
@@ -267,18 +257,18 @@ public class FIUBAmateView extends JFrame
 		// gbcCmbboxSpotColor.gridy = 3;
 		// panelSpotOptions.add( selectorForSpots, gbcCmbboxSpotColor );
 
-		final UpdateListener refresher = () -> refresh();
-		ds.listeners().add(refresher);
-		selectionModel.addSelectionChangeListener(this);
-		model.addModelChangeListener(this);
-		addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(final java.awt.event.WindowEvent e) {
-				selectionModel.removeSelectionChangeListener(FIUBAmateView.this);
-				model.removeModelChangeListener(FIUBAmateView.this);
-				ds.listeners().remove(refresher);
-			};
-		});
+		// final UpdateListener refresher = () -> refresh();
+		// ds.listeners().add(refresher);
+		// selectionModel.addSelectionChangeListener(this);
+		// model.addModelChangeListener(this);
+		// addWindowListener(new WindowAdapter() {
+		// 	@Override
+		// 	public void windowClosing(final java.awt.event.WindowEvent e) {
+		// 		// selectionModel.removeSelectionChangeListener(FIUBAmateView.this);
+		// 		// model.removeModelChangeListener(FIUBAmateView.this);
+		// 		ds.listeners().remove(refresher);
+		// 	};
+		// });
 		Roi.addRoiListener(this);
 	}
 
@@ -313,6 +303,8 @@ public class FIUBAmateView extends JFrame
 				CSVWriter.NO_QUOTE_CHARACTER,
 				CSVWriter.DEFAULT_ESCAPE_CHARACTER,
 				CSVWriter.DEFAULT_LINE_END)) {
+			String[] header = {"trackID", "cantidad"};
+			writer.writeNext(header);
 			writer.writeNext(new String[] { stats });
 		} catch (final IOException e) {
 			model.getLogger().error("Problem exporting to file "
@@ -415,53 +407,53 @@ public class FIUBAmateView extends JFrame
 		repaint();
 	}
 
-	@Override
-	public void modelChanged(final ModelChangeEvent event) {
-		if (event.getEventID() == ModelChangeEvent.FEATURES_COMPUTED) {
-			refresh();
-			return;
-		}
+	// @Override
+	// public void modelChanged(final ModelChangeEvent event) {
+	// 	if (event.getEventID() == ModelChangeEvent.FEATURES_COMPUTED) {
+	// 		refresh();
+	// 		return;
+	// 	}
 
-		final List<Spot> spots = new ArrayList<>();
-		for (final Spot spot : model.getSpots().iterable(true))
-			spots.add(spot);
-		// spotTable.setObjects( spots );
+	// 	final List<Spot> spots = new ArrayList<>();
+	// 	for (final Spot spot : model.getSpots().iterable(true))
+	// 		spots.add(spot);
+	// 	// spotTable.setObjects( spots );
 
-		refresh();
-	}
+	// 	refresh();
+	// }
 
 	/*
 	 * Forward selection model changes to the tables.
 	 */
-	@Override
-	public void selectionChanged(final SelectionChangeEvent event) {
-		if (ignoreSelectionChange.get())
-			return;
-		ignoreSelectionChange.set(true);
+	// @Override
+	// public void selectionChanged(final SelectionChangeEvent event) {
+	// 	if (ignoreSelectionChange.get())
+	// 		return;
+	// 	ignoreSelectionChange.set(true);
 
-		// Vertices table.
-		final Set<Spot> selectedVertices = selectionModel.getSpotSelection();
-		// final JTable vt = spotTable.getTable();
-		// vt.getSelectionModel().clearSelection();
-		// for ( final Spot spot : selectedVertices )
-		// {
-		// final int row = spotTable.getViewRowForObject( spot );
-		// vt.getSelectionModel().addSelectionInterval( row, row );
-		// }
+	// 	// Vertices table.
+	// 	final Set<Spot> selectedVertices = selectionModel.getSpotSelection();
+	// 	// final JTable vt = spotTable.getTable();
+	// 	// vt.getSelectionModel().clearSelection();
+	// 	// for ( final Spot spot : selectedVertices )
+	// 	// {
+	// 	// final int row = spotTable.getViewRowForObject( spot );
+	// 	// vt.getSelectionModel().addSelectionInterval( row, row );
+	// 	// }
 
-		// Center on selection if we added one spot exactly
-		final Map<Spot, Boolean> spotsAdded = event.getSpots();
-		if (spotsAdded != null && spotsAdded.size() == 1) {
-			final boolean added = spotsAdded.values().iterator().next();
-			if (added) {
-				final Spot spot = spotsAdded.keySet().iterator().next();
-				centerViewOn(spot);
-			}
-		}
+	// 	// Center on selection if we added one spot exactly
+	// 	final Map<Spot, Boolean> spotsAdded = event.getSpots();
+	// 	if (spotsAdded != null && spotsAdded.size() == 1) {
+	// 		final boolean added = spotsAdded.values().iterator().next();
+	// 		if (added) {
+	// 			final Spot spot = spotsAdded.keySet().iterator().next();
+	// 			centerViewOn(spot);
+	// 		}
+	// 	}
 
-		refresh();
-		ignoreSelectionChange.set(false);
-	}
+	// 	refresh();
+	// 	ignoreSelectionChange.set(false);
+	// }
 
 	@Override
 	public void centerViewOn(final Spot spot) {
@@ -483,26 +475,11 @@ public class FIUBAmateView extends JFrame
 	}
 
 	public void roiModified(ImagePlus img, int id) {
-		String type = "UNKNOWN";
 		switch (id) {
 			case CREATED:
-				type = "CREATED";
 				btnAgregarArea.setEnabled(true);
 				break;
-			case MOVED:
-				type = "MOVED";
-				break;
-			case MODIFIED:
-				type = "MODIFIED";
-				break;
-			case EXTENDED:
-				type = "EXTENDED";
-				break;
-			case COMPLETED:
-				type = "COMPLETED";
-				break;
 			case DELETED:
-				type = "DELETED";
 				btnAgregarArea.setEnabled(false);
 				break;
 		}
@@ -527,6 +504,13 @@ public class FIUBAmateView extends JFrame
 		// IJ.log(p.toString());
 		// }
 		IJ.log(roi.getBounds().toString());
+
+		addedAreas.add(roi);
+		lblAmountAreasAdded.setText("Cantidad de areas agregadas: " + addedAreas.size());
+
+		if (addedAreas.size() > 0) {
+			btnExportarCSV.setEnabled(true);
+		}
 	}
 
 	private void onExportarCSV() {

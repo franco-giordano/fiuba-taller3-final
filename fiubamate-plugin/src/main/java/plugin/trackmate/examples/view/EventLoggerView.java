@@ -13,7 +13,6 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import ij.IJ;
-import ij.gui.RoiListener;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import java.awt.Point;
