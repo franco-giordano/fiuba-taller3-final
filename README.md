@@ -6,7 +6,7 @@ Proyecto realizado durante Diciembre 2021, por Julian Ferres y Franco Giordano.
 
 ### Descarga
 
-Puede descargarse la [ultima version aqui](https://github.com/franco-giordano/fiuba-taller3-final/releases/latest/download/fiji-fiuba.zip).
+Puede descargarse la [ultima version aqui](https://github.com/franco-giordano/fiuba-taller3-final/releases/latest/).
 
 ### Manual de Usuario
 
