@@ -27,7 +27,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -37,6 +39,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.TrackModel;
 import fiji.plugin.trackmate.util.FileChooser;
 import fiji.plugin.trackmate.util.FileChooser.DialogType;
 import fiji.plugin.trackmate.util.FileChooser.SelectionMode;
@@ -60,8 +63,6 @@ public class FIUBAmateView extends JFrame
 	public static String selectedFile = TrackTableView.selectedFile;
 
 	private final Model model;
-
-	private Roi roi = null;
 
 	private final JButton btnAgregarArea;
 	private final JButton btnExportarCSV;
@@ -186,7 +187,10 @@ public class FIUBAmateView extends JFrame
 		Roi.addRoiListener(this);
 	}
 
-	public void exportToCsv(String stats) {
+	public void exportToCsv(List<String[]> stats) {
+		/*
+		 * Recibo la lista de spots que cruzaron cada ROI y la exporto como csv.
+		 */
 		final File file = FileChooser.chooseFile(
 				this,
 				selectedFile,
@@ -198,21 +202,21 @@ public class FIUBAmateView extends JFrame
 			return;
 
 		selectedFile = file.getAbsolutePath();
-		exportToCsv(selectedFile, stats);
-	}
 
-	public void exportToCsv(final String csvFile, String stats) {
-		try (CSVWriter writer = new CSVWriter(new FileWriter(csvFile),
+		// Se escribe el archivo elegido	
+		try (CSVWriter writer = new CSVWriter(new FileWriter(selectedFile),
 				CSVWriter.DEFAULT_SEPARATOR,
 				CSVWriter.NO_QUOTE_CHARACTER,
 				CSVWriter.DEFAULT_ESCAPE_CHARACTER,
 				CSVWriter.DEFAULT_LINE_END)) {
-			String[] header = {"trackID", "cantidad"};
+			String[] header = {"ROI ID", "cantidad"};
 			writer.writeNext(header);
-			writer.writeNext(new String[] { stats });
+			for (String[] stat : stats) {
+				writer.writeNext(stat);
+			}
 		} catch (final IOException e) {
 			model.getLogger().error("Problem exporting to file "
-					+ csvFile + "\n" + e.getMessage());
+					+ selectedFile + "\n" + e.getMessage());
 		}
 	}
 
@@ -259,9 +263,9 @@ public class FIUBAmateView extends JFrame
 	}
 
 	private void onAgregarArea() {
-		IJ.log("apretaron agregar area");
+		IJ.log("Se agrego un ROI");
 		ImagePlus img = IJ.getImage();
-		this.roi = img.getRoi();
+		Roi roi = img.getRoi();
 		if (roi == null) {
 			IJ.log("ROI nulo :(\n");
 			return;
@@ -278,25 +282,60 @@ public class FIUBAmateView extends JFrame
 	}
 
 	private void onExportarCSV() {
-		// Se itera frame a frame, y se itera por cada spot en ese frame
-		// Si el centro de dicho spot esta en el ROI, se agrega el punto a una estructura de set
-		// y se calcula el porcentaje de spots que pasaron por el ROI
+		/* Se itera frame a frame, y se itera por cada spot en ese frame
+		 * Si el centro de dicho spot esta en el ROI, se agrega el punto a una estructura de set
+		 * y se calcula el porcentaje de spots que pasaron por el ROI 
+		 */
+		List<String[]> stats = new ArrayList<String[]>();
 
-		int nFrames = IJ.getImage().getNFrames();
-		SpotCollection spotCollection = model.getSpots();
-
-		for(int frame = 0; frame < nFrames; frame++) {
-			IJ.log("frame: " + frame);
-			if(spotCollection == null) {
-				IJ.log("spotCollection es null");
-				return;
-			}
-			for(Spot spot: spotCollection.iterable(frame, false)) {
-				IJ.log(spot.toString());
-			}
+		for(int i = 0; i < addedAreas.size(); i++) {
+			stats.add(spotsInROI(addedAreas.get(i), i));
 		}
+
 			
 		IJ.log("Exportando CSV");
-		exportToCsv(String.valueOf(nFrames));
+		exportToCsv(stats);
+	}
+
+	private String[] spotsInROI(Roi roi, int roi_index) {
+		/* Se itera frame a frame, y se itera por cada spot en ese frame
+		 * Si el centro de dicho spot esta en el ROI, se agrega el punto a una estructura de set
+		 * y se calcula el porcentaje de spots que pasaron por el ROI 
+		 */
+
+		// int nFrames = IJ.getImage().getNFrames();
+		SpotCollection spotCollection = model.getSpots();
+		Set<Integer> tracksInRoi = new HashSet<Integer>();
+
+		IJ.log("Contando los spots en el ROI");
+
+		// get trackIds from model
+		TrackModel trackModel = model.getTrackModel();
+		Set<Integer> trackIds = trackModel.trackIDs(false);
+
+		if(spotCollection == null) {
+			IJ.log("No hay spots\n");
+			return new String[] {String.valueOf(roi_index), "0"};
+		}
+
+		for(Integer trackId : trackIds) {
+			// get spots from trackId
+	
+
+			for(Spot spot: trackModel.trackSpots(trackId)) {
+				// get POSITION_X and POSITION_Y from the spot
+				double x = spot.getFeature(Spot.POSITION_X);
+				double y = spot.getFeature(Spot.POSITION_Y);
+
+				// Check if the point (x, y) is inside the ROI
+				if (roi.containsPoint(x, y)) {
+					tracksInRoi.add(trackId);
+					break;
+				}				
+			}
+		}
+		IJ.log("Tracks in ROI" + tracksInRoi.toString());
+
+		return new String[] {String.valueOf(roi_index), String.valueOf(tracksInRoi.size())};
 	}
 }
