@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,6 +49,7 @@ import fiji.plugin.trackmate.SelectionChangeEvent;
 import fiji.plugin.trackmate.SelectionChangeListener;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings;
 import fiji.plugin.trackmate.gui.displaysettings.DisplaySettings.UpdateListener;
 import fiji.plugin.trackmate.util.FileChooser;
@@ -75,6 +77,7 @@ public class FIUBAmateView extends JFrame
 	private final Model model;
 
 	// private final TablePanel< Spot > spotTable;
+	private Roi roi = null;
 
 	private final AtomicBoolean ignoreSelectionChange = new AtomicBoolean(false);
 
@@ -279,7 +282,7 @@ public class FIUBAmateView extends JFrame
 		Roi.addRoiListener(this);
 	}
 
-	public void exportToCsv() {
+	public void exportToCsv(String stats) {
 		final File file = FileChooser.chooseFile(
 				this,
 				selectedFile,
@@ -291,10 +294,10 @@ public class FIUBAmateView extends JFrame
 			return;
 
 		selectedFile = file.getAbsolutePath();
-		exportToCsv(selectedFile);
+		exportToCsv(selectedFile, stats);
 	}
 
-	public void exportToCsv(final String csvFile)  {
+	public void exportToCsv(final String csvFile, String stats) {
 		// try
 		// {
 		// spotTable.exportToCsv( new File( csvFile ) );
@@ -310,7 +313,7 @@ public class FIUBAmateView extends JFrame
 				CSVWriter.NO_QUOTE_CHARACTER,
 				CSVWriter.DEFAULT_ESCAPE_CHARACTER,
 				CSVWriter.DEFAULT_LINE_END)) {
-			writer.writeNext(new String[] { "Primer csv :)" });
+			writer.writeNext(new String[] { stats });
 		} catch (final IOException e) {
 			model.getLogger().error("Problem exporting to file "
 					+ csvFile + "\n" + e.getMessage());
@@ -509,7 +512,7 @@ public class FIUBAmateView extends JFrame
 	private void onAgregarArea() {
 		IJ.log("apretaron agregar area");
 		ImagePlus img = IJ.getImage();
-		Roi roi = img.getRoi();
+		this.roi = img.getRoi();
 		if (roi == null) {
 			IJ.log("ROI nulo :(\n");
 			return;
@@ -526,10 +529,27 @@ public class FIUBAmateView extends JFrame
 		IJ.log(roi.getBounds().toString());
 	}
 
-
 	private void onExportarCSV() {
+		// Se itera frame a frame, y se itera por cada spot en ese frame
+		// Si el centro de dicho spot esta en el ROI, se agrega el punto a una estructura de set
+		// y se calcula el porcentaje de spots que pasaron por el ROI
+
+		int nFrames = IJ.getImage().getNFrames();
+		SpotCollection spotCollection = model.getSpots();
+
+		for(int frame = 0; frame < nFrames; frame++) {
+			IJ.log("frame: " + frame);
+			if(spotCollection == null) {
+				IJ.log("spotCollection es null");
+				return;
+			}
+			for(Spot spot: spotCollection.iterable(frame, false)) {
+				IJ.log(spot.toString());
+			}
+		}
+			
 		IJ.log("Exportando CSV");
-		exportToCsv();
+		exportToCsv(String.valueOf(nFrames));
 	}
 
 	/**
