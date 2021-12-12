@@ -10,9 +10,8 @@ import java.util.Set;
 public class Utils {
     public static List<Spot> sortTrackSpots(Set<Spot> spots) {
         /* 
-            Pareceria absurdo convertir entre 20 tipos
-            distintos solo para ordenarlo, pero bueno,
-            por eso odiamos java no?
+            En realidad, solo necesitamos el minT y maxT,
+            no hace falta reordenar todo el set
          */
         Spot[] array = spots.toArray(new Spot[0]);
         List<Spot> list = Arrays.asList(array);

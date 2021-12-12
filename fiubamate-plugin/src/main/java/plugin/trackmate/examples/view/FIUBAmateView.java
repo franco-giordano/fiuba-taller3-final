@@ -272,6 +272,18 @@ public class FIUBAmateView extends JFrame
 		gbc_tftLast.gridx = 1;
 		gbc_tftLast.gridy = 1;
 		panelFrameConfig.add(tftLast, gbc_tftLast);
+
+
+        // String s = "Nota: FIUBAmate ignorara los cuerpos que comiencen antes del Primer Frame, o terminen luego del Ultimo Frame.";
+        // String html = "<html><body style='width: 250px; text-align: center'>";
+		// final JLabel lblnotaSobreFrames = new JLabel(html+s);
+		// lblnotaSobreFrames.setFont(SMALL_FONT);
+		// final GridBagConstraints gbclblnotaSobreFrames = new GridBagConstraints();
+		// gbclblnotaSobreFrames.anchor = GridBagConstraints.CENTER;
+		// gbclblnotaSobreFrames.insets = new Insets(0, 5, 5, 5);
+		// gbclblnotaSobreFrames.gridx = 0;
+		// gbclblnotaSobreFrames.gridy = 2;
+		// panelFrameConfig.add(lblnotaSobreFrames, gbclblnotaSobreFrames);
 		final FocusListener fl = new FocusAdapter() {
 			@Override
 			public void focusGained(final FocusEvent e) {
