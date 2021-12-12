@@ -52,6 +52,7 @@ import fiji.plugin.trackmate.visualization.table.TrackTableView;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.RoiListener;
+import plugin.trackmate.examples.Utils;
 import ij.gui.Roi;
 
 import java.text.NumberFormat;
@@ -91,7 +92,7 @@ public class FIUBAmateView extends JFrame
 		setIconImage(TRACKMATE_ICON.getImage());
 		this.model = model;
 		firstFrame = 0;
-		lastFrame = -1;
+		lastFrame = IJ.getImage().getNFrames() - 1;
 
 		/*
 		 * GUI.
@@ -230,13 +231,13 @@ public class FIUBAmateView extends JFrame
 		gbcpanelFrameConfig.gridy = 4;
 		add(panelFrameConfig, gbcpanelFrameConfig);
 		final GridBagLayout gblpanelFrameConfig = new GridBagLayout();
-		gblpanelFrameConfig.columnWeights = new double[] { 0.0, 1.0 };
+		gblpanelFrameConfig.columnWeights = new double[] { 0.0, 0.0 };
 		gblpanelFrameConfig.rowWeights = new double[] { 0.0, 0.0 };
 		panelFrameConfig.setLayout(gblpanelFrameConfig);
 
 		final JLabel lblFirstFrame = new JLabel("Primer frame:");
 		final GridBagConstraints gbc_lblFirstFrame = new GridBagConstraints();
-		gbc_lblFirstFrame.anchor = GridBagConstraints.EAST;
+		gbc_lblFirstFrame.anchor = GridBagConstraints.CENTER;
 		gbc_lblFirstFrame.insets = new Insets(5, 5, 5, 5);
 		gbc_lblFirstFrame.gridx = 0;
 		gbc_lblFirstFrame.gridy = 0;
@@ -246,7 +247,7 @@ public class FIUBAmateView extends JFrame
 		tftFirst.setValue(Integer.valueOf(firstFrame));
 		tftFirst.setColumns(5);
 		final GridBagConstraints gbc_tftFirst = new GridBagConstraints();
-		gbc_tftFirst.anchor = GridBagConstraints.CENTER;
+		gbc_tftFirst.anchor = GridBagConstraints.WEST;
 		gbc_tftFirst.insets = new Insets(5, 0, 5, 5);
 		// gbc_tftFirst.fill = GridBagConstraints.HORIZONTAL;
 		gbc_tftFirst.gridx = 1;
@@ -255,7 +256,7 @@ public class FIUBAmateView extends JFrame
 
 		final JLabel lbllastFrame = new JLabel("Ultimo frame:");
 		final GridBagConstraints gbc_lbllastFrame = new GridBagConstraints();
-		gbc_lbllastFrame.anchor = GridBagConstraints.EAST;
+		gbc_lbllastFrame.anchor = GridBagConstraints.CENTER;
 		gbc_lbllastFrame.insets = new Insets(0, 5, 5, 5);
 		gbc_lbllastFrame.gridx = 0;
 		gbc_lbllastFrame.gridy = 1;
@@ -265,7 +266,7 @@ public class FIUBAmateView extends JFrame
 		tftLast.setValue(Integer.valueOf(lastFrame));
 		tftLast.setColumns(5);
 		final GridBagConstraints gbc_tftLast = new GridBagConstraints();
-		gbc_tftLast.anchor = GridBagConstraints.CENTER;
+		gbc_tftLast.anchor = GridBagConstraints.WEST;
 		gbc_tftLast.insets = new Insets(0, 0, 5, 5);
 		// gbc_tftLast.fill = GridBagConstraints.HORIZONTAL;
 		gbc_tftLast.gridx = 1;
@@ -379,10 +380,7 @@ public class FIUBAmateView extends JFrame
 
 		addedAreas.add(roi);
 		lblAmountAreasAdded.setText("Cantidad de areas agregadas: " + addedAreas.size());
-
-		if (addedAreas.size() > 0) {
-			btnExportarCSV.setEnabled(true);
-		}
+		btnExportarCSV.setEnabled(true);
 	}
 
 	private void onExportarCSV() {
@@ -410,7 +408,6 @@ public class FIUBAmateView extends JFrame
 		 * y se calcula el porcentaje de spots que pasaron por el ROI
 		 */
 
-		// int nFrames = IJ.getImage().getNFrames();
 		SpotCollection spotCollection = model.getSpots();
 		Set<Integer> tracksInRoi = new HashSet<Integer>();
 
@@ -419,6 +416,7 @@ public class FIUBAmateView extends JFrame
 		// get trackIds from model
 		TrackModel trackModel = model.getTrackModel();
 		Set<Integer> trackIds = trackModel.trackIDs(false);
+		int cantidadTracksValidos = 0; // es menor o igual que trackids.size()
 
 		if (spotCollection == null) {
 			IJ.log("No hay spots\n");
@@ -427,10 +425,22 @@ public class FIUBAmateView extends JFrame
 
 		for (Integer trackId : trackIds) {
 			// get spots from trackId
-			for (Spot spot : trackModel.trackSpots(trackId)) {
+			List<Spot> sortedTrackSpots = Utils.sortTrackSpots(trackModel.trackSpots(trackId));
+
+			IJ.log(trackId + " track id ============================");
+
+			if (isIncompleteTrack(sortedTrackSpots)) {
+				IJ.log("Track comienza o termina fuera de los limites. Ignorando...");
+				continue;
+			}
+
+			cantidadTracksValidos++;
+
+			for (Spot spot : sortedTrackSpots) {
 				// get POSITION_X and POSITION_Y from the spot
 				double x = spot.getFeature(Spot.POSITION_X);
 				double y = spot.getFeature(Spot.POSITION_Y);
+				// IJ.log("posicion T: " + String.valueOf(spot.getFeature(Spot.POSITION_T)));
 
 				// Check if the point (x, y) is inside the ROI
 				if (roi.containsPoint(x, y)) {
@@ -440,12 +450,20 @@ public class FIUBAmateView extends JFrame
 			}
 		}
 		IJ.log("Tracks in ROI " + tracksInRoi.toString());
-		float proportion = (float) tracksInRoi.size() / trackIds.size();
+		IJ.log("Se encontraron " + cantidadTracksValidos + " tracks validos ('completos')");
+		float proportion = (float) tracksInRoi.size() / cantidadTracksValidos;
 
 		return new String[] {
 				String.valueOf(roi_index),
 				String.valueOf(tracksInRoi.size()),
 				String.format("%.4f", proportion),
 		};
+	}
+
+	private boolean isIncompleteTrack(List<Spot> sortedTrackSpots) {
+		double firstSpotFrame = sortedTrackSpots.get(0).getFeature(Spot.POSITION_T);
+		double lastSpotFrame = sortedTrackSpots.get(sortedTrackSpots.size() - 1).getFeature(Spot.POSITION_T);
+		// IJ.log("frames: " + firstSpotFrame + ", " + this.firstFrame + ", " + this.lastFrame + ", " + lastSpotFrame);
+		return firstSpotFrame < this.firstFrame || this.lastFrame < lastSpotFrame;
 	}
 }
