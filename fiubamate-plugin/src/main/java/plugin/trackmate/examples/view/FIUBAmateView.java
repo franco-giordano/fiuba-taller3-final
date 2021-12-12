@@ -18,6 +18,7 @@ import java.awt.Insets;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
@@ -114,8 +115,16 @@ public class FIUBAmateView extends JFrame
 		 */
 
 		final JButton btnEditSettings = new JButton("Ver creditos", LOG_ICON);
-		// btnEditSettings.addActionListener( e -> editor.setVisible(
-		// !editor.isVisible() ) );
+		btnEditSettings.addActionListener(e -> {
+			final VerCreditosPanel panel = new VerCreditosPanel();
+			JOptionPane.showMessageDialog(
+					null,
+					panel,
+					"FIUBAmate - Creditos",
+					JOptionPane.INFORMATION_MESSAGE,
+					TRACKMATE_ICON
+					);
+		});
 
 		final GridBagConstraints gbcBtnEditSettings = new GridBagConstraints();
 		gbcBtnEditSettings.fill = GridBagConstraints.NONE;
@@ -125,7 +134,7 @@ public class FIUBAmateView extends JFrame
 		gbcBtnEditSettings.gridy = 0;
 		add(btnEditSettings, gbcBtnEditSettings);
 
-		final JLabel lblContarCuerpos = new JLabel("Contabilizar cuerpos en Area");
+		final JLabel lblContarCuerpos = new JLabel("Obtener estadisticas en Area");
 		lblContarCuerpos.setFont(FONT);
 		final GridBagConstraints gbcLblContarCuerpos = new GridBagConstraints();
 		gbcLblContarCuerpos.anchor = GridBagConstraints.NORTH;
