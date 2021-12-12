@@ -153,7 +153,7 @@ public class FIUBAmateView extends JFrame
 		gblPanelSpotOptions.rowWeights = new double[] { 0.0, 0.0 };
 		panelSpotOptions.setLayout(gblPanelSpotOptions);
 
-		btnAgregarArea = new JButton("Agregar Area", ADD_ICON);
+		btnAgregarArea = new JButton("Guardar Area", ADD_ICON);
 		btnAgregarArea.addActionListener(e -> onAgregarArea());
 		btnAgregarArea.setEnabled(false);
 
@@ -203,13 +203,13 @@ public class FIUBAmateView extends JFrame
 
 		selectedFile = file.getAbsolutePath();
 
-		// Se escribe el archivo elegido	
+		// Se escribe el archivo elegido
 		try (CSVWriter writer = new CSVWriter(new FileWriter(selectedFile),
 				CSVWriter.DEFAULT_SEPARATOR,
 				CSVWriter.NO_QUOTE_CHARACTER,
 				CSVWriter.DEFAULT_ESCAPE_CHARACTER,
 				CSVWriter.DEFAULT_LINE_END)) {
-			String[] header = {"ROI ID", "cantidad"};
+			String[] header = { "ROI ID", "cantidad", "proporcion" };
 			writer.writeNext(header);
 			for (String[] stat : stats) {
 				writer.writeNext(stat);
@@ -282,25 +282,28 @@ public class FIUBAmateView extends JFrame
 	}
 
 	private void onExportarCSV() {
-		/* Se itera frame a frame, y se itera por cada spot en ese frame
-		 * Si el centro de dicho spot esta en el ROI, se agrega el punto a una estructura de set
-		 * y se calcula el porcentaje de spots que pasaron por el ROI 
+		/*
+		 * Se itera frame a frame, y se itera por cada spot en ese frame
+		 * Si el centro de dicho spot esta en el ROI, se agrega el punto a una
+		 * estructura de set
+		 * y se calcula el porcentaje de spots que pasaron por el ROI
 		 */
 		List<String[]> stats = new ArrayList<String[]>();
 
-		for(int i = 0; i < addedAreas.size(); i++) {
+		for (int i = 0; i < addedAreas.size(); i++) {
 			stats.add(spotsInROI(addedAreas.get(i), i));
 		}
 
-			
 		IJ.log("Exportando CSV");
 		exportToCsv(stats);
 	}
 
 	private String[] spotsInROI(Roi roi, int roi_index) {
-		/* Se itera frame a frame, y se itera por cada spot en ese frame
-		 * Si el centro de dicho spot esta en el ROI, se agrega el punto a una estructura de set
-		 * y se calcula el porcentaje de spots que pasaron por el ROI 
+		/*
+		 * Se itera frame a frame, y se itera por cada spot en ese frame
+		 * Si el centro de dicho spot esta en el ROI, se agrega el punto a una
+		 * estructura de set
+		 * y se calcula el porcentaje de spots que pasaron por el ROI
 		 */
 
 		// int nFrames = IJ.getImage().getNFrames();
@@ -313,16 +316,14 @@ public class FIUBAmateView extends JFrame
 		TrackModel trackModel = model.getTrackModel();
 		Set<Integer> trackIds = trackModel.trackIDs(false);
 
-		if(spotCollection == null) {
+		if (spotCollection == null) {
 			IJ.log("No hay spots\n");
-			return new String[] {String.valueOf(roi_index), "0"};
+			return new String[] { String.valueOf(roi_index), "0", "0.0000" };
 		}
 
-		for(Integer trackId : trackIds) {
+		for (Integer trackId : trackIds) {
 			// get spots from trackId
-	
-
-			for(Spot spot: trackModel.trackSpots(trackId)) {
+			for (Spot spot : trackModel.trackSpots(trackId)) {
 				// get POSITION_X and POSITION_Y from the spot
 				double x = spot.getFeature(Spot.POSITION_X);
 				double y = spot.getFeature(Spot.POSITION_Y);
@@ -331,11 +332,16 @@ public class FIUBAmateView extends JFrame
 				if (roi.containsPoint(x, y)) {
 					tracksInRoi.add(trackId);
 					break;
-				}				
+				}
 			}
 		}
-		IJ.log("Tracks in ROI" + tracksInRoi.toString());
+		IJ.log("Tracks in ROI " + tracksInRoi.toString());
+		float proportion = (float) tracksInRoi.size() / trackIds.size();
 
-		return new String[] {String.valueOf(roi_index), String.valueOf(tracksInRoi.size())};
+		return new String[] {
+				String.valueOf(roi_index),
+				String.valueOf(tracksInRoi.size()),
+				String.format("%.4f", proportion),
+		};
 	}
 }
