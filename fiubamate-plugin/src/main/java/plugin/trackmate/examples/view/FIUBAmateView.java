@@ -16,11 +16,13 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 
 import javax.swing.JButton;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 
 import java.awt.BorderLayout;
@@ -52,6 +54,12 @@ import ij.ImagePlus;
 import ij.gui.RoiListener;
 import ij.gui.Roi;
 
+import java.text.NumberFormat;
+
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+
 public class FIUBAmateView extends JFrame
 		implements TrackMateModelView, RoiListener {
 
@@ -70,6 +78,10 @@ public class FIUBAmateView extends JFrame
 
 	private List<Roi> addedAreas = new ArrayList<Roi>();
 
+	private int firstFrame;
+
+	private int lastFrame;
+
 	private JLabel lblAmountAreasAdded;
 
 	public FIUBAmateView(final Model model, final SelectionModel selectionModel) {
@@ -78,6 +90,8 @@ public class FIUBAmateView extends JFrame
 		IJ.log("Cantidad de Tracks distintos en el modelo: " + model.getTrackModel().trackIDs(false).size());
 		setIconImage(TRACKMATE_ICON.getImage());
 		this.model = model;
+		firstFrame = 0;
+		lastFrame = -1;
 
 		/*
 		 * GUI.
@@ -86,8 +100,8 @@ public class FIUBAmateView extends JFrame
 		final JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BorderLayout());
 
-		this.setPreferredSize(new Dimension(300, 521));
-		this.setSize(300, 400);
+		this.setPreferredSize(new Dimension(350, 521));
+		this.setSize(350, 400);
 
 		final GridBagLayout layout = new GridBagLayout();
 		layout.columnWeights = new double[] { 1.0, 1.0 };
@@ -110,10 +124,6 @@ public class FIUBAmateView extends JFrame
 		gbcLabelDisplayOptions.gridy = 0;
 		add(lblDisplayOptions, gbcLabelDisplayOptions);
 
-		/*
-		 * Settings editor.
-		 */
-
 		final JButton btnEditSettings = new JButton("Ver creditos", LOG_ICON);
 		btnEditSettings.addActionListener(e -> {
 			final VerCreditosPanel panel = new VerCreditosPanel();
@@ -122,8 +132,7 @@ public class FIUBAmateView extends JFrame
 					panel,
 					"FIUBAmate - Creditos",
 					JOptionPane.INFORMATION_MESSAGE,
-					TRACKMATE_ICON
-					);
+					TRACKMATE_ICON);
 		});
 
 		final GridBagConstraints gbcBtnEditSettings = new GridBagConstraints();
@@ -192,6 +201,92 @@ public class FIUBAmateView extends JFrame
 		gbclblAmountAreasAdded.gridx = 0;
 		gbclblAmountAreasAdded.gridy = 2;
 		panelSpotOptions.add(lblAmountAreasAdded, gbclblAmountAreasAdded);
+
+		/*
+		 * Panel de Configurar frames
+		 */
+
+		final JLabel lblConfigFrames = new JLabel("Configurar frames de interes");
+		lblConfigFrames.setFont(FONT);
+		final GridBagConstraints gbclblConfigFrames = new GridBagConstraints();
+		gbclblConfigFrames.anchor = GridBagConstraints.NORTH;
+		gbclblConfigFrames.fill = GridBagConstraints.HORIZONTAL;
+		gbclblConfigFrames.insets = new Insets(0, 5, 0, 5);
+		gbclblConfigFrames.gridx = 0;
+		gbclblConfigFrames.gridy = 3;
+		add(lblConfigFrames, gbclblConfigFrames);
+
+		/*
+		 * Spot options panel.
+		 */
+
+		final JPanel panelFrameConfig = new JPanel();
+		panelFrameConfig.setBorder(new LineBorder(BORDER_COLOR, 1, true));
+		final GridBagConstraints gbcpanelFrameConfig = new GridBagConstraints();
+		gbcpanelFrameConfig.gridwidth = 2;
+		gbcpanelFrameConfig.insets = new Insets(0, 5, 5, 5);
+		gbcpanelFrameConfig.fill = GridBagConstraints.BOTH;
+		gbcpanelFrameConfig.gridx = 0;
+		gbcpanelFrameConfig.gridy = 4;
+		add(panelFrameConfig, gbcpanelFrameConfig);
+		final GridBagLayout gblpanelFrameConfig = new GridBagLayout();
+		gblpanelFrameConfig.columnWeights = new double[] { 0.0, 1.0 };
+		gblpanelFrameConfig.rowWeights = new double[] { 0.0, 0.0 };
+		panelFrameConfig.setLayout(gblpanelFrameConfig);
+
+		final JLabel lblFirstFrame = new JLabel("Primer frame:");
+		final GridBagConstraints gbc_lblFirstFrame = new GridBagConstraints();
+		gbc_lblFirstFrame.anchor = GridBagConstraints.EAST;
+		gbc_lblFirstFrame.insets = new Insets(5, 5, 5, 5);
+		gbc_lblFirstFrame.gridx = 0;
+		gbc_lblFirstFrame.gridy = 0;
+		panelFrameConfig.add(lblFirstFrame, gbc_lblFirstFrame);
+
+		final JFormattedTextField tftFirst = new JFormattedTextField(NumberFormat.getIntegerInstance());
+		tftFirst.setValue(Integer.valueOf(firstFrame));
+		tftFirst.setColumns(5);
+		final GridBagConstraints gbc_tftFirst = new GridBagConstraints();
+		gbc_tftFirst.anchor = GridBagConstraints.CENTER;
+		gbc_tftFirst.insets = new Insets(5, 0, 5, 5);
+		// gbc_tftFirst.fill = GridBagConstraints.HORIZONTAL;
+		gbc_tftFirst.gridx = 1;
+		gbc_tftFirst.gridy = 0;
+		panelFrameConfig.add(tftFirst, gbc_tftFirst);
+
+		final JLabel lbllastFrame = new JLabel("Ultimo frame:");
+		final GridBagConstraints gbc_lbllastFrame = new GridBagConstraints();
+		gbc_lbllastFrame.anchor = GridBagConstraints.EAST;
+		gbc_lbllastFrame.insets = new Insets(0, 5, 5, 5);
+		gbc_lbllastFrame.gridx = 0;
+		gbc_lbllastFrame.gridy = 1;
+		panelFrameConfig.add(lbllastFrame, gbc_lbllastFrame);
+
+		final JFormattedTextField tftLast = new JFormattedTextField(NumberFormat.getIntegerInstance());
+		tftLast.setValue(Integer.valueOf(lastFrame));
+		tftLast.setColumns(5);
+		final GridBagConstraints gbc_tftLast = new GridBagConstraints();
+		gbc_tftLast.anchor = GridBagConstraints.CENTER;
+		gbc_tftLast.insets = new Insets(0, 0, 5, 5);
+		// gbc_tftLast.fill = GridBagConstraints.HORIZONTAL;
+		gbc_tftLast.gridx = 1;
+		gbc_tftLast.gridy = 1;
+		panelFrameConfig.add(tftLast, gbc_tftLast);
+		final FocusListener fl = new FocusAdapter() {
+			@Override
+			public void focusGained(final FocusEvent e) {
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						((JFormattedTextField) e.getSource()).selectAll();
+					}
+				});
+			}
+		};
+		tftFirst.addFocusListener(fl);
+		tftLast.addFocusListener(fl);
+
+		tftFirst.addPropertyChangeListener("value", (e) -> this.firstFrame = ((Number) tftFirst.getValue()).intValue());
+		tftLast.addPropertyChangeListener("value", (e) -> this.lastFrame = ((Number) tftLast.getValue()).intValue());
 
 		Roi.addRoiListener(this);
 	}
