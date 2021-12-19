@@ -47,7 +47,6 @@ import fiji.plugin.trackmate.util.FileChooser;
 import fiji.plugin.trackmate.util.FileChooser.DialogType;
 import fiji.plugin.trackmate.util.FileChooser.SelectionMode;
 import fiji.plugin.trackmate.visualization.TrackMateModelView;
-import fiji.plugin.trackmate.visualization.table.TrackTableView;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -70,13 +69,14 @@ public class FIUBAmateView extends JFrame
 
 	private static final String KEY = "FIUBAMATE";
 
-	public static String selectedFile = TrackTableView.selectedFile;
+	public static String csvSelectedFile = System.getProperty( "user.home" ) + File.separator + "proporcion_cuerpos.csv";
+	public static String csvDistribucionTemporalSelectedFile = System.getProperty( "user.home" ) + File.separator + "distribucion_temporal_cuerpos.csv";
 
 	private final Model model;
 
 	private final JButton btnAgregarArea;
 	private final JButton btnExportarCSV;
-	private final JButton btnExportarTiemposCSV;
+	private final JButton btnExportarDistribucionTemporalCSV;
 
 	private List<Roi> addedAreas = new ArrayList<Roi>();
 
@@ -195,16 +195,16 @@ public class FIUBAmateView extends JFrame
 		gbcbtnExportarCSV.gridy = 1;
 		panelSpotOptions.add(btnExportarCSV, gbcbtnExportarCSV);
 
-		btnExportarTiemposCSV = new JButton("Exportar Tiempos a CSV", CSV_ICON);
-		btnExportarTiemposCSV.addActionListener(e -> onExportarTiemposCSV());
-		btnExportarTiemposCSV.setEnabled(false);
+		btnExportarDistribucionTemporalCSV = new JButton("Exportar tiempos a CSV", CSV_ICON);
+		btnExportarDistribucionTemporalCSV.addActionListener(e -> onExportarDistribucionTemporalCSV());
+		btnExportarDistribucionTemporalCSV.setEnabled(false);
 
-		final GridBagConstraints gbcbtnExportarTiemposCSV = new GridBagConstraints();
-		gbcbtnExportarTiemposCSV.anchor = GridBagConstraints.CENTER;
-		gbcbtnExportarTiemposCSV.insets = new Insets(2, 5, 2, 5);
-		gbcbtnExportarTiemposCSV.gridx = 0;
-		gbcbtnExportarTiemposCSV.gridy = 2;
-		panelSpotOptions.add(btnExportarTiemposCSV, gbcbtnExportarTiemposCSV);
+		final GridBagConstraints gbcbtnExportarDistribucionTemporalCSV = new GridBagConstraints();
+		gbcbtnExportarDistribucionTemporalCSV.anchor = GridBagConstraints.CENTER;
+		gbcbtnExportarDistribucionTemporalCSV.insets = new Insets(2, 5, 2, 5);
+		gbcbtnExportarDistribucionTemporalCSV.gridx = 0;
+		gbcbtnExportarDistribucionTemporalCSV.gridy = 2;
+		panelSpotOptions.add(btnExportarDistribucionTemporalCSV, gbcbtnExportarDistribucionTemporalCSV);
 
 		lblAmountAreasAdded = new JLabel("Cantidad de areas agregadas: " + addedAreas.size());
 		lblAmountAreasAdded.setFont(SMALL_FONT);
@@ -316,7 +316,7 @@ public class FIUBAmateView extends JFrame
 		Roi.addRoiListener(this);
 	}
 
-	public void exportToCsv(List<String[]> stats) {
+	public void exportToCsv(List<String[]> stats, String[] header, String selectedFile) {
 		/*
 		 * Recibo la lista de spots que cruzaron cada ROI y la exporto como csv.
 		 */
@@ -338,7 +338,6 @@ public class FIUBAmateView extends JFrame
 				CSVWriter.NO_QUOTE_CHARACTER,
 				CSVWriter.DEFAULT_ESCAPE_CHARACTER,
 				CSVWriter.DEFAULT_LINE_END)) {
-			String[] header = { "ROI ID", "cantidad", "proporcion" };
 			writer.writeNext(header);
 			for (String[] stat : stats) {
 				writer.writeNext(stat);
@@ -404,6 +403,7 @@ public class FIUBAmateView extends JFrame
 		addedAreas.add(roi);
 		lblAmountAreasAdded.setText("Cantidad de areas agregadas: " + addedAreas.size());
 		btnExportarCSV.setEnabled(true);
+		btnExportarDistribucionTemporalCSV.setEnabled(true);
 	}
 
 	private void onExportarCSV() {
@@ -420,10 +420,21 @@ public class FIUBAmateView extends JFrame
 		}
 
 		IJ.log("Exportando CSV");
-		exportToCsv(stats);
+		String[] header = { "ROI ID", "cantidad", "proporcion" };
+		exportToCsv(stats, header, csvSelectedFile);
 	}
 
-	private void onExportarTiemposCSV() {
+	private void onExportarDistribucionTemporalCSV() {
+		/*
+		 * Para cada ROI, se itera frame a frame, y se itera por cada spot en ese frame
+		 * Si el centro de dicho spot esta en el ROI, se actualizan entrada y salida 
+		 * del roi para ese spot
+		 */
+		List<String[]> stats = new ArrayList<String[]>();
+
+		IJ.log("Exportando CSV temporal");
+		String[] header = { "ROI ID", "Frame Entrada", "Frame Salida", "Spot ID"};
+		exportToCsv(stats, header, csvDistribucionTemporalSelectedFile);
 	}
 
 
