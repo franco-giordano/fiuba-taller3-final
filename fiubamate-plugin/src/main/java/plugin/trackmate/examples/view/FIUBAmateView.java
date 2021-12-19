@@ -1,10 +1,11 @@
 package plugin.trackmate.examples.view;
 
 import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
-import static fiji.plugin.trackmate.gui.Icons.LOG_ICON;
 import static fiji.plugin.trackmate.gui.Icons.ADD_ICON;
 import static fiji.plugin.trackmate.gui.Icons.CSV_ICON;
+import static fiji.plugin.trackmate.gui.Icons.LOG_ICON;
 import static fiji.plugin.trackmate.gui.Icons.PLOT_ICON;
+import static fiji.plugin.trackmate.gui.Icons.REMOVE_ICON;
 
 import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
 import static fiji.plugin.trackmate.gui.Fonts.FONT;
@@ -76,6 +77,7 @@ public class FIUBAmateView extends JFrame
 	private final Model model;
 
 	private final JButton btnAgregarArea;
+	private final JButton btnRemoverArea;
 	private final JButton btnExportarCSV;
 	private final JButton btnExportarDistribucionTemporalCSV;
 
@@ -185,6 +187,17 @@ public class FIUBAmateView extends JFrame
 		gbcbtnAgregarArea.gridy = 0;
 		panelSpotOptions.add(btnAgregarArea, gbcbtnAgregarArea);
 
+		btnRemoverArea = new JButton("Remover ultima Area", REMOVE_ICON);
+		btnRemoverArea.addActionListener(e -> onRemoverArea());
+		btnRemoverArea.setEnabled(false);
+
+		final GridBagConstraints gbcbtnRemoverArea = new GridBagConstraints();
+		gbcbtnRemoverArea.anchor = GridBagConstraints.CENTER;
+		gbcbtnRemoverArea.insets = new Insets(5, 5, 2, 5);
+		gbcbtnRemoverArea.gridx = 0;
+		gbcbtnRemoverArea.gridy = 1;
+		panelSpotOptions.add(btnRemoverArea, gbcbtnRemoverArea);
+
 		btnExportarCSV = new JButton("Exportar a CSV", CSV_ICON);
 		btnExportarCSV.addActionListener(e -> onExportarCSV());
 		btnExportarCSV.setEnabled(false);
@@ -193,7 +206,7 @@ public class FIUBAmateView extends JFrame
 		gbcbtnExportarCSV.anchor = GridBagConstraints.CENTER;
 		gbcbtnExportarCSV.insets = new Insets(2, 5, 2, 5);
 		gbcbtnExportarCSV.gridx = 0;
-		gbcbtnExportarCSV.gridy = 1;
+		gbcbtnExportarCSV.gridy = 2;
 		panelSpotOptions.add(btnExportarCSV, gbcbtnExportarCSV);
 
 		btnExportarDistribucionTemporalCSV = new JButton("Exportar tiempos a CSV", PLOT_ICON);
@@ -204,7 +217,7 @@ public class FIUBAmateView extends JFrame
 		gbcbtnExportarDistribucionTemporalCSV.anchor = GridBagConstraints.CENTER;
 		gbcbtnExportarDistribucionTemporalCSV.insets = new Insets(2, 5, 2, 5);
 		gbcbtnExportarDistribucionTemporalCSV.gridx = 0;
-		gbcbtnExportarDistribucionTemporalCSV.gridy = 2;
+		gbcbtnExportarDistribucionTemporalCSV.gridy = 3;
 		panelSpotOptions.add(btnExportarDistribucionTemporalCSV, gbcbtnExportarDistribucionTemporalCSV);
 
 		lblAmountAreasAdded = new JLabel("Cantidad de areas agregadas: " + addedAreas.size());
@@ -213,7 +226,7 @@ public class FIUBAmateView extends JFrame
 		gbclblAmountAreasAdded.anchor = GridBagConstraints.CENTER;
 		gbclblAmountAreasAdded.insets = new Insets(2, 5, 5, 5);
 		gbclblAmountAreasAdded.gridx = 0;
-		gbclblAmountAreasAdded.gridy = 2;
+		gbclblAmountAreasAdded.gridy = 4;
 		panelSpotOptions.add(lblAmountAreasAdded, gbclblAmountAreasAdded);
 
 		/*
@@ -402,9 +415,22 @@ public class FIUBAmateView extends JFrame
 		IJ.log(roi.getBounds().toString());
 
 		addedAreas.add(roi);
+		btnRemoverArea.setEnabled(addedAreas.size() > 0);
 		lblAmountAreasAdded.setText("Cantidad de areas agregadas: " + addedAreas.size());
 		btnExportarCSV.setEnabled(true);
 		btnExportarDistribucionTemporalCSV.setEnabled(true);
+	}
+
+	private void onRemoverArea() {
+		IJ.log("Se removio el ultimo ROI");
+		addedAreas.remove(addedAreas.size() - 1);
+
+		int n_added_areas = addedAreas.size();
+
+		lblAmountAreasAdded.setText("Cantidad de areas agregadas: " + n_added_areas);
+		btnExportarCSV.setEnabled(n_added_areas > 0);
+		btnExportarDistribucionTemporalCSV.setEnabled(n_added_areas > 0);
+		btnRemoverArea.setEnabled(n_added_areas > 0);
 	}
 
 	private void onExportarCSV() {
