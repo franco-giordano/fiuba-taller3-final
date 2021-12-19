@@ -4,6 +4,7 @@ import static fiji.plugin.trackmate.gui.Icons.TRACKMATE_ICON;
 import static fiji.plugin.trackmate.gui.Icons.LOG_ICON;
 import static fiji.plugin.trackmate.gui.Icons.ADD_ICON;
 import static fiji.plugin.trackmate.gui.Icons.CSV_ICON;
+import static fiji.plugin.trackmate.gui.Icons.PLOT_ICON;
 
 import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
 import static fiji.plugin.trackmate.gui.Fonts.FONT;
@@ -195,7 +196,7 @@ public class FIUBAmateView extends JFrame
 		gbcbtnExportarCSV.gridy = 1;
 		panelSpotOptions.add(btnExportarCSV, gbcbtnExportarCSV);
 
-		btnExportarDistribucionTemporalCSV = new JButton("Exportar tiempos a CSV", CSV_ICON);
+		btnExportarDistribucionTemporalCSV = new JButton("Exportar tiempos a CSV", PLOT_ICON);
 		btnExportarDistribucionTemporalCSV.addActionListener(e -> onExportarDistribucionTemporalCSV());
 		btnExportarDistribucionTemporalCSV.setEnabled(false);
 
