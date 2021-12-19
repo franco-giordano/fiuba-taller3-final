@@ -76,6 +76,7 @@ public class FIUBAmateView extends JFrame
 
 	private final JButton btnAgregarArea;
 	private final JButton btnExportarCSV;
+	private final JButton btnExportarTiemposCSV;
 
 	private List<Roi> addedAreas = new ArrayList<Roi>();
 
@@ -193,6 +194,17 @@ public class FIUBAmateView extends JFrame
 		gbcbtnExportarCSV.gridx = 0;
 		gbcbtnExportarCSV.gridy = 1;
 		panelSpotOptions.add(btnExportarCSV, gbcbtnExportarCSV);
+
+		btnExportarTiemposCSV = new JButton("Exportar Tiempos a CSV", CSV_ICON);
+		btnExportarTiemposCSV.addActionListener(e -> onExportarTiemposCSV());
+		btnExportarTiemposCSV.setEnabled(false);
+
+		final GridBagConstraints gbcbtnExportarTiemposCSV = new GridBagConstraints();
+		gbcbtnExportarTiemposCSV.anchor = GridBagConstraints.CENTER;
+		gbcbtnExportarTiemposCSV.insets = new Insets(2, 5, 2, 5);
+		gbcbtnExportarTiemposCSV.gridx = 0;
+		gbcbtnExportarTiemposCSV.gridy = 2;
+		panelSpotOptions.add(btnExportarTiemposCSV, gbcbtnExportarTiemposCSV);
 
 		lblAmountAreasAdded = new JLabel("Cantidad de areas agregadas: " + addedAreas.size());
 		lblAmountAreasAdded.setFont(SMALL_FONT);
@@ -376,7 +388,6 @@ public class FIUBAmateView extends JFrame
 				btnAgregarArea.setEnabled(false);
 				break;
 		}
-		// IJ.log("ROI modified: " + (img != null ? img.getTitle() : "") + ", " + type);
 	}
 
 	private void onAgregarArea() {
@@ -411,6 +422,10 @@ public class FIUBAmateView extends JFrame
 		IJ.log("Exportando CSV");
 		exportToCsv(stats);
 	}
+
+	private void onExportarTiemposCSV() {
+	}
+
 
 	private String[] spotsInROI(Roi roi, int roi_index) {
 		/*
@@ -452,7 +467,6 @@ public class FIUBAmateView extends JFrame
 				// get POSITION_X and POSITION_Y from the spot
 				double x = spot.getFeature(Spot.POSITION_X);
 				double y = spot.getFeature(Spot.POSITION_Y);
-				// IJ.log("posicion T: " + String.valueOf(spot.getFeature(Spot.POSITION_T)));
 
 				// Check if the point (x, y) is inside the ROI
 				if (roi.containsPoint(x, y)) {
