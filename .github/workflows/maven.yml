@@ -22,15 +22,15 @@ jobs:
         java-version: '11'
         distribution: 'adopt'
         cache: maven
-    - name: Change Dir
-      run: cd fiubamate-plugin
     - name: Build with Maven
-      run: mvn -B package
+      run: |
+        cd fiubamate-plugin
+        mvn -B package
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.3.1
       with:
         # Artifact name
         name: FIUBAmate-plugin.jar # optional, default is artifact
         # A file, directory or wildcard pattern that describes what to upload
-        path: target/FIUBAmate-1.0.0.jar
+        path: fiubamate-plugin/target/FIUBAmate-1.0.0.jar
         # The desired behavior if no files are found using the provided path.
