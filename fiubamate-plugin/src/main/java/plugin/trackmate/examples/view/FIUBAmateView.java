@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -54,6 +55,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.RoiListener;
 import plugin.trackmate.examples.Utils;
+import plugin.trackmate.examples.SpotEntradaSalida;
 import ij.gui.Roi;
 
 import java.text.NumberFormat;
@@ -61,6 +63,7 @@ import java.text.NumberFormat;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+
 
 public class FIUBAmateView extends JFrame
 		implements TrackMateModelView, RoiListener {
@@ -459,6 +462,10 @@ public class FIUBAmateView extends JFrame
 		 */
 		List<String[]> stats = new ArrayList<String[]>();
 
+		for (int i = 0; i < addedAreas.size(); i++) {
+			entradaSalidaROI(addedAreas.get(i), i, stats);
+		}
+
 		IJ.log("Exportando CSV temporal");
 		String[] header = { "ROI ID", "Frame Entrada", "Frame Salida", "Spot ID"};
 		exportToCsv(stats, header, csvDistribucionTemporalSelectedFile);
@@ -530,4 +537,78 @@ public class FIUBAmateView extends JFrame
 		// IJ.log("frames: " + firstSpotFrame + ", " + this.firstFrame + ", " + this.lastFrame + ", " + lastSpotFrame);
 		return firstSpotFrame < this.firstFrame || this.lastFrame < lastSpotFrame;
 	}
+
+
+	private void entradaSalidaROI(Roi roi, int roi_index, List<String[]> stats) {
+		/*
+		 * Se itera frame a frame, y se itera por cada spot en ese frame
+		 * Si el centro de dicho spot esta en el ROI, se agrega el punto a una
+		 * estructura de set
+		 * y se calcula el porcentaje de spots que pasaron por el ROI
+		 */
+
+		SpotCollection spotCollection = model.getSpots();
+
+		
+		IJ.log("Min y Max para cada spot en un ROI");
+
+		// get trackIds from model
+		TrackModel trackModel = model.getTrackModel();
+		Set<Integer> trackIds = trackModel.trackIDs(false);
+		int cantidadTracksValidos = 0; // es menor o igual que trackids.size()
+
+		if (spotCollection == null) {
+			IJ.log("No hay spots\n");
+			stats.add(new String[] { String.valueOf(roi_index), "NaN", "NaN" });
+			return;
+		}
+
+		ArrayList<SpotEntradaSalida> spotsInRoi = new ArrayList<SpotEntradaSalida>();
+		
+
+		for (Integer trackId : trackIds) {
+			// get spots from trackId
+			List<Spot> sortedTrackSpots = Utils.sortTrackSpots(trackModel.trackSpots(trackId));
+
+			IJ.log(trackId + "tiempos: track id ============================");
+
+			if (isIncompleteTrack(sortedTrackSpots)) {
+				IJ.log("Track comienza o termina fuera de los limites. Ignorando...");
+				continue;
+			}
+
+			SpotEntradaSalida spotIO = new SpotEntradaSalida(trackId);
+
+			cantidadTracksValidos++;
+
+			for (Spot spot : sortedTrackSpots) {
+				// get POSITION_X and POSITION_Y from the spot
+				double x = spot.getFeature(Spot.POSITION_X);
+				double y = spot.getFeature(Spot.POSITION_Y);
+				int frame_act = spot.getFeature(Spot.FRAME).intValue();
+
+				// Check if the point (x, y) is inside the ROI
+				if (roi.containsPoint(x, y)) {
+					spotIO.updateFrames(frame_act);
+				}
+			}
+			spotsInRoi.add(spotIO);
+
+		}
+		IJ.log("Tracks in ROI " + spotsInRoi.toString());
+		IJ.log("Se encontraron " + cantidadTracksValidos + " tracks validos ('completos')");
+
+		Collections.sort(spotsInRoi);
+
+		for(SpotEntradaSalida spot: spotsInRoi){
+			if(!spot.valido()) continue;
+			stats.add(new String[] { 
+				String.valueOf(roi_index), 
+				String.valueOf(spot.getTrackID()), 
+				String.valueOf(spot.getFrameInicio()), 
+				String.valueOf(spot.getFrameFin()) 
+			});
+		}
+	}
+
 }
