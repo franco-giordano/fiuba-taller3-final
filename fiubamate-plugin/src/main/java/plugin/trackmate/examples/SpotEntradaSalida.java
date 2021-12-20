@@ -7,7 +7,7 @@ public class SpotEntradaSalida implements Comparable<SpotEntradaSalida> {
     public SpotEntradaSalida(int track_id) {
         this.track_id = track_id;
         this.frame_inicio = -1;
-        this.frame_fin = 0;
+        this.frame_fin = -1;
     }
 
     public SpotEntradaSalida(int track_id, int frame_inicio, int frame_fin) {
@@ -29,12 +29,17 @@ public class SpotEntradaSalida implements Comparable<SpotEntradaSalida> {
     }
 
     public void updateFrames(int frame_act) {
-        this.frame_inicio = Math.min(this.frame_inicio, frame_act);
-        this.frame_fin = Math.max(this.frame_fin, frame_act);
+        if(frame_inicio == -1 && frame_fin == -1) {
+            frame_inicio = frame_act;
+            frame_fin = frame_act;
+            return;
+        }
+        frame_inicio = Math.min(frame_inicio, frame_act);
+        frame_fin = Math.max(frame_fin, frame_act);
     }
 
     public boolean valido() {
-        return this.frame_inicio != -1;
+        return frame_inicio != -1 && frame_fin != -1;
     }
 
     // Sort by frame_inicio, then by frame_fin then by track_id

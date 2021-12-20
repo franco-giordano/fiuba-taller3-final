@@ -216,7 +216,7 @@ public class FIUBAmateView extends JFrame
 		gbclblAmountAreasAdded.anchor = GridBagConstraints.CENTER;
 		gbclblAmountAreasAdded.insets = new Insets(2, 5, 5, 5);
 		gbclblAmountAreasAdded.gridx = 0;
-		gbclblAmountAreasAdded.gridy = 2;
+		gbclblAmountAreasAdded.gridy = 3;
 		panelSpotOptions.add(lblAmountAreasAdded, gbclblAmountAreasAdded);
 
 		/*
