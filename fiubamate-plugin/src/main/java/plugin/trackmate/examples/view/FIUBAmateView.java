@@ -575,6 +575,7 @@ public class FIUBAmateView extends JFrame
 		Collections.sort(spotsInRoi);
 
 		for(SpotEntradaSalida spot: spotsInRoi){
+			if(!spot.valido()) continue;
 			stats.add(new String[] { 
 				String.valueOf(roi_index), 
 				String.valueOf(spot.getTrackID()), 

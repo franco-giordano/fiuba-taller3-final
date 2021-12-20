@@ -33,7 +33,7 @@ public class SpotEntradaSalida implements Comparable<SpotEntradaSalida> {
         this.frame_fin = Math.max(this.frame_fin, frame_act);
     }
 
-    public boolean spotValido() {
+    public boolean valido() {
         return this.frame_inicio != -1;
     }
 
