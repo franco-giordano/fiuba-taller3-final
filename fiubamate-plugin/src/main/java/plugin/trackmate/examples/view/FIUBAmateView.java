@@ -94,8 +94,8 @@ public class FIUBAmateView extends JFrame
 
 	public FIUBAmateView(final Model model, final SelectionModel selectionModel) {
 		super("FIUBAmate");
-		IJ.log("Inicio!");
-		IJ.log("Cantidad de Tracks distintos en el modelo: " + model.getTrackModel().trackIDs(false).size());
+		// IJ.log("Inicio!");
+		// IJ.log("Cantidad de Tracks distintos en el modelo: " + model.getTrackModel().trackIDs(false).size());
 		setIconImage(TRACKMATE_ICON.getImage());
 		this.model = model;
 		firstFrame = 0;
@@ -451,15 +451,15 @@ public class FIUBAmateView extends JFrame
 	}
 
 	private void onAgregarArea() {
-		IJ.log("Se agrego un ROI");
+		// IJ.log("Se agrego un ROI");
 		ImagePlus img = IJ.getImage();
 		Roi roi = img.getRoi();
 		if (roi == null) {
-			IJ.log("ROI nulo :(\n");
+			// IJ.log("ROI nulo :(\n");
 			return;
 		}
 
-		IJ.log(roi.getBounds().toString());
+		// IJ.log(roi.getBounds().toString());
 
 		addedAreas.add(roi);
 
@@ -467,7 +467,7 @@ public class FIUBAmateView extends JFrame
 	}
 
 	private void onRemoverArea() {
-		IJ.log("Se removio el ultimo ROI");
+		// IJ.log("Se removio el ultimo ROI");
 		addedAreas.remove(addedAreas.size() - 1);
 		updateActionButtons();
 	}
@@ -485,7 +485,7 @@ public class FIUBAmateView extends JFrame
 			stats.add(spotsInROI(addedAreas.get(i), i));
 		}
 
-		IJ.log("Exportando CSV");
+		// IJ.log("Exportando CSV");
 		String[] header = { "ROI ID", "cantidad", "proporcion" };
 		exportToCsv(stats, header, csvSelectedFile);
 	}
@@ -502,7 +502,7 @@ public class FIUBAmateView extends JFrame
 			entradaSalidaROI(addedAreas.get(i), i, stats);
 		}
 
-		IJ.log("Exportando CSV temporal");
+		// IJ.log("Exportando CSV temporal");
 		String[] header = { "ROI ID", "Frame Entrada", "Frame Salida", "Spot ID" };
 		exportToCsv(stats, header, csvDistribucionTemporalSelectedFile);
 	}
@@ -518,7 +518,7 @@ public class FIUBAmateView extends JFrame
 		SpotCollection spotCollection = model.getSpots();
 		Set<Integer> tracksInRoi = new HashSet<Integer>();
 
-		IJ.log("Contando los spots en el ROI");
+		// IJ.log("Contando los spots en el ROI");
 
 		// get trackIds from model
 		TrackModel trackModel = model.getTrackModel();
@@ -526,7 +526,7 @@ public class FIUBAmateView extends JFrame
 		int cantidadTracksValidos = 0; // es menor o igual que trackids.size()
 
 		if (spotCollection == null) {
-			IJ.log("No hay spots\n");
+			// IJ.log("No hay spots\n");
 			return new String[] { String.valueOf(roi_index), "0", "0.0000" };
 		}
 
@@ -534,10 +534,10 @@ public class FIUBAmateView extends JFrame
 			// get spots from trackId
 			List<Spot> sortedTrackSpots = Utils.sortTrackSpots(trackModel.trackSpots(trackId));
 
-			IJ.log(trackId + " track id ============================");
+			// IJ.log(trackId + " track id ============================");
 
 			if (isIncompleteTrack(sortedTrackSpots)) {
-				IJ.log("Track comienza o termina fuera de los limites. Ignorando...");
+				// IJ.log("Track comienza o termina fuera de los limites. Ignorando...");
 				continue;
 			}
 
@@ -555,8 +555,8 @@ public class FIUBAmateView extends JFrame
 				}
 			}
 		}
-		IJ.log("Tracks in ROI " + tracksInRoi.toString());
-		IJ.log("Se encontraron " + cantidadTracksValidos + " tracks validos ('completos')");
+		// IJ.log("Tracks in ROI " + tracksInRoi.toString());
+		// IJ.log("Se encontraron " + cantidadTracksValidos + " tracks validos ('completos')");
 		float proportion = (float) tracksInRoi.size() / cantidadTracksValidos;
 
 		return new String[] {
@@ -584,7 +584,7 @@ public class FIUBAmateView extends JFrame
 
 		SpotCollection spotCollection = model.getSpots();
 
-		IJ.log("Min y Max para cada spot en un ROI");
+		// IJ.log("Min y Max para cada spot en un ROI");
 
 		// get trackIds from model
 		TrackModel trackModel = model.getTrackModel();
@@ -592,7 +592,7 @@ public class FIUBAmateView extends JFrame
 		int cantidadTracksValidos = 0; // es menor o igual que trackids.size()
 
 		if (spotCollection == null) {
-			IJ.log("No hay spots\n");
+			// IJ.log("No hay spots\n");
 			stats.add(new String[] { String.valueOf(roi_index), "NaN", "NaN" });
 			return;
 		}
@@ -603,10 +603,10 @@ public class FIUBAmateView extends JFrame
 			// get spots from trackId
 			List<Spot> sortedTrackSpots = Utils.sortTrackSpots(trackModel.trackSpots(trackId));
 
-			IJ.log(trackId + "tiempos: track id ============================");
+			// IJ.log(trackId + "tiempos: track id ============================");
 
 			if (isIncompleteTrack(sortedTrackSpots)) {
-				IJ.log("Track comienza o termina fuera de los limites. Ignorando...");
+				// IJ.log("Track comienza o termina fuera de los limites. Ignorando...");
 				continue;
 			}
 
@@ -628,8 +628,8 @@ public class FIUBAmateView extends JFrame
 			spotsInRoi.add(spotIO);
 
 		}
-		IJ.log("Tracks in ROI " + spotsInRoi.toString());
-		IJ.log("Se encontraron " + cantidadTracksValidos + " tracks validos ('completos')");
+		// IJ.log("Tracks in ROI " + spotsInRoi.toString());
+		// IJ.log("Se encontraron " + cantidadTracksValidos + " tracks validos ('completos')");
 
 		Collections.sort(spotsInRoi);
 
