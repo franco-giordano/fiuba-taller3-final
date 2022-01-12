@@ -31,7 +31,7 @@ public class EventLoggerView implements TrackMateModelView, ModelChangeListener,
 		this.model = model;
 		this.selectionModel = selectionModel;
 
-		IJ.log("Bienvenido a FIUBAmate");
+		IJ.log("Welcome to FIUBAmate");
 		ImagePlus imp = IJ.getImage();
 		IJ.log(imp.getInfoProperty());
 		IJ.log(imp.getTitle());
@@ -39,7 +39,7 @@ public class EventLoggerView implements TrackMateModelView, ModelChangeListener,
 		Roi roi = imp.getRoi();
 
 		if (roi == null) {
-			IJ.log("ROI nulo :(\n");
+			IJ.log("not ROI :(\n");
 			return;
 		}
 		IJ.log("DEBUG INFO: " + roi.getDebugInfo() + "\n");
@@ -167,8 +167,4 @@ public class EventLoggerView implements TrackMateModelView, ModelChangeListener,
 		IJ.log(str.toString());
 	}
 
-	// @Override
-	// public void roiModified​(ImagePlus imp, int id) {
-	// IJ.log("Cambio el ROI! \n");
-	// }
 }

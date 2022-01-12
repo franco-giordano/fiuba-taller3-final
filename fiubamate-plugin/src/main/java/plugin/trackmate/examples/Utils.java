@@ -9,9 +9,8 @@ import java.util.Set;
 
 public class Utils {
     public static List<Spot> sortTrackSpots(Set<Spot> spots) {
-        /* 
-            En realidad, solo necesitamos el minT y maxT,
-            no hace falta reordenar todo el set
+        /*
+         * We only need minT and maxT, sort the spots in not entirely needed.
          */
         Spot[] array = spots.toArray(new Spot[0]);
         List<Spot> list = Arrays.asList(array);

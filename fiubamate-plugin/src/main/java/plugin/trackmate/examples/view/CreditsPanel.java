@@ -6,11 +6,11 @@ import java.awt.Insets;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-public class VerCreditosPanel extends JPanel {
+public class CreditsPanel extends JPanel {
 
     private static final long serialVersionUID = 1L;
 
-    public VerCreditosPanel() {
+    public CreditsPanel() {
         final GridBagLayout gridBagLayout = new GridBagLayout();
         gridBagLayout.columnWidths = new int[] { 0, 0, 0 };
         gridBagLayout.rowHeights = new int[] { 0, 0 };
@@ -18,7 +18,7 @@ public class VerCreditosPanel extends JPanel {
         gridBagLayout.rowWeights = new double[] { 1.0, Double.MIN_VALUE };
         setLayout(gridBagLayout);
 
-        final JLabel lblFirstFrame = new JLabel("Creditos");
+        final JLabel lblFirstFrame = new JLabel("Credits");
         final GridBagConstraints gbc_lblFirstFrame = new GridBagConstraints();
         gbc_lblFirstFrame.anchor = GridBagConstraints.WEST;
         gbc_lblFirstFrame.insets = new Insets(0, 0, 5, 5);
@@ -26,7 +26,7 @@ public class VerCreditosPanel extends JPanel {
         gbc_lblFirstFrame.gridy = 0;
         add(lblFirstFrame, gbc_lblFirstFrame);
 
-        String s = "Proyecto desarrollado por Julian Ferres y Franco Giordano en el marco de la materia Taller de Programacion III, FIUBA, 2C2021. Con la colaboracion del Grupo de Medios Porosos.";
+        String s = "Developed by Julian Ferres and Franco Giordano, during 'Taller de Programacion III, FIUBA, 2C2021, Argentina'. In partnership with 'Medios Porosos' Lab";
         String html = "<html><body style='width: 200px'>";
 
         final JLabel lblLastFrame = new JLabel(html + s);

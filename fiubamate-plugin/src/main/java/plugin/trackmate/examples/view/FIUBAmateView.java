@@ -56,7 +56,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.RoiListener;
 import plugin.trackmate.examples.Utils;
-import plugin.trackmate.examples.SpotEntradaSalida;
+import plugin.trackmate.examples.SpotIO;
 import ij.gui.Roi;
 
 import java.text.NumberFormat;
@@ -74,29 +74,30 @@ public class FIUBAmateView extends JFrame
 
 	private static final String KEY = "FIUBAMATE";
 
-	public static String csvSelectedFile = System.getProperty("user.home") + File.separator + "proporcion_cuerpos.csv";
-	public static String csvDistribucionTemporalSelectedFile = System.getProperty("user.home") + File.separator
-			+ "distribucion_temporal_cuerpos.csv";
+	public static String csvSelectedFile = System.getProperty("user.home") + File.separator + "body_proportion.csv";
+	public static String csvTemporalDistSelectedFile = System.getProperty("user.home") + File.separator
+			+ "body_temporal_dist.csv";
 
 	private final Model model;
 
-	private final JButton btnAgregarArea;
-	private final JButton btnRemoverArea;
-	private final JButton btnExportarCSV;
-	private final JButton btnExportarDistribucionTemporalCSV;
+	private final JButton btnAddRegion;
+	private final JButton btnRemoveRegion;
+	private final JButton btnExportCSV;
+	private final JButton btnExportTemporalDistCSV;
 
-	private List<Roi> addedAreas = new ArrayList<Roi>();
+	private List<Roi> addedRegions = new ArrayList<Roi>();
 
 	private int firstFrame;
 
 	private int lastFrame;
 
-	private JLabel lblAmountAreasAdded;
+	private JLabel lblAmountRegionsAdded;
 
 	public FIUBAmateView(final Model model, final SelectionModel selectionModel) {
 		super("FIUBAmate");
 		// IJ.log("Inicio!");
-		// IJ.log("Cantidad de Tracks distintos en el modelo: " + model.getTrackModel().trackIDs(false).size());
+		// IJ.log("Cantidad de Tracks distintos en el modelo: " +
+		// model.getTrackModel().trackIDs(false).size());
 		setIconImage(TRACKMATE_ICON.getImage());
 		this.model = model;
 		firstFrame = 0;
@@ -134,39 +135,39 @@ public class FIUBAmateView extends JFrame
 		gbcLabelDisplayOptions.gridy = 0;
 		add(lblDisplayOptions, gbcLabelDisplayOptions);
 
-		final JButton btnVerCreditos = new JButton("Ver creditos", LOG_ICON);
-		btnVerCreditos.addActionListener(e -> {
-			final VerCreditosPanel panel = new VerCreditosPanel();
+		final JButton btnCredits = new JButton("Credits", LOG_ICON);
+		btnCredits.addActionListener(e -> {
+			final CreditsPanel panel = new CreditsPanel();
 			JOptionPane.showMessageDialog(
 					null,
 					panel,
-					"FIUBAmate - Creditos",
+					"FIUBAmate - Credits",
 					JOptionPane.INFORMATION_MESSAGE,
 					TRACKMATE_ICON);
 		});
 
-		final GridBagConstraints gbcbtnVerCreditos = new GridBagConstraints();
-		gbcbtnVerCreditos.fill = GridBagConstraints.NONE;
-		gbcbtnVerCreditos.insets = new Insets(5, 5, 5, 5);
-		gbcbtnVerCreditos.anchor = GridBagConstraints.EAST;
-		gbcbtnVerCreditos.gridx = 1;
-		gbcbtnVerCreditos.gridy = 0;
-		add(btnVerCreditos, gbcbtnVerCreditos);
+		final GridBagConstraints gbcbtnCredits = new GridBagConstraints();
+		gbcbtnCredits.fill = GridBagConstraints.NONE;
+		gbcbtnCredits.insets = new Insets(5, 5, 5, 5);
+		gbcbtnCredits.anchor = GridBagConstraints.EAST;
+		gbcbtnCredits.gridx = 1;
+		gbcbtnCredits.gridy = 0;
+		add(btnCredits, gbcbtnCredits);
 
 		/*
 		 * ===========================================
-		 * Panel de agregar areas
+		 * Panel to add region
 		 */
 
-		final JLabel lblContarCuerpos = new JLabel("Modificar Areas de interes");
-		lblContarCuerpos.setFont(FONT);
-		final GridBagConstraints gbcLblContarCuerpos = new GridBagConstraints();
-		gbcLblContarCuerpos.anchor = GridBagConstraints.NORTH;
-		gbcLblContarCuerpos.fill = GridBagConstraints.HORIZONTAL;
-		gbcLblContarCuerpos.insets = new Insets(5, 5, 0, 5);
-		gbcLblContarCuerpos.gridx = 0;
-		gbcLblContarCuerpos.gridy = 1;
-		add(lblContarCuerpos, gbcLblContarCuerpos);
+		final JLabel lblCountBodies = new JLabel("Modify Regions of Interest");
+		lblCountBodies.setFont(FONT);
+		final GridBagConstraints gbcLblCountBodies = new GridBagConstraints();
+		gbcLblCountBodies.anchor = GridBagConstraints.NORTH;
+		gbcLblCountBodies.fill = GridBagConstraints.HORIZONTAL;
+		gbcLblCountBodies.insets = new Insets(5, 5, 0, 5);
+		gbcLblCountBodies.gridx = 0;
+		gbcLblCountBodies.gridy = 1;
+		add(lblCountBodies, gbcLblCountBodies);
 
 		final JPanel panelSpotOptions = new JPanel();
 		panelSpotOptions.setBorder(new LineBorder(BORDER_COLOR, 1, true));
@@ -182,46 +183,46 @@ public class FIUBAmateView extends JFrame
 		gblPanelSpotOptions.rowWeights = new double[] { 0.0, 0.0 };
 		panelSpotOptions.setLayout(gblPanelSpotOptions);
 
-		btnAgregarArea = new JButton("Guardar Area", ADD_ICON);
-		btnAgregarArea.addActionListener(e -> onAgregarArea());
-		btnAgregarArea.setEnabled(false);
-		btnAgregarArea.setToolTipText("Incluir el area actualmente seleccionada como una de interes.");
+		btnAddRegion = new JButton("Save Area", ADD_ICON);
+		btnAddRegion.addActionListener(e -> onAddRegion());
+		btnAddRegion.setEnabled(false);
+		btnAddRegion.setToolTipText("Include selected area.");
 
-		final GridBagConstraints gbcbtnAgregarArea = new GridBagConstraints();
-		gbcbtnAgregarArea.anchor = GridBagConstraints.EAST;
-		gbcbtnAgregarArea.insets = new Insets(5, 5, 2, 2);
-		gbcbtnAgregarArea.gridx = 0;
-		gbcbtnAgregarArea.gridy = 0;
-		panelSpotOptions.add(btnAgregarArea, gbcbtnAgregarArea);
+		final GridBagConstraints gbcbtnAddArea = new GridBagConstraints();
+		gbcbtnAddArea.anchor = GridBagConstraints.EAST;
+		gbcbtnAddArea.insets = new Insets(5, 5, 2, 2);
+		gbcbtnAddArea.gridx = 0;
+		gbcbtnAddArea.gridy = 0;
+		panelSpotOptions.add(btnAddRegion, gbcbtnAddArea);
 
-		btnRemoverArea = new JButton("Remover Ultima Area", REMOVE_ICON);
-		btnRemoverArea.addActionListener(e -> onRemoverArea());
-		btnRemoverArea.setEnabled(false);
-		btnRemoverArea.setToolTipText("Quitar la ultima area recientemente guardada.");
+		btnRemoveRegion = new JButton("Remove last region", REMOVE_ICON);
+		btnRemoveRegion.addActionListener(e -> onRemoveRegion());
+		btnRemoveRegion.setEnabled(false);
+		btnRemoveRegion.setToolTipText("Quitar la ultima area recientemente guardada.");
 
 		final GridBagConstraints gbcbtnRemoverArea = new GridBagConstraints();
 		gbcbtnRemoverArea.anchor = GridBagConstraints.WEST;
 		gbcbtnRemoverArea.insets = new Insets(5, 2, 2, 5);
 		gbcbtnRemoverArea.gridx = 1;
 		gbcbtnRemoverArea.gridy = 0;
-		panelSpotOptions.add(btnRemoverArea, gbcbtnRemoverArea);
+		panelSpotOptions.add(btnRemoveRegion, gbcbtnRemoverArea);
 
-		lblAmountAreasAdded = new JLabel("Cantidad de areas agregadas: " + addedAreas.size());
-		lblAmountAreasAdded.setFont(SMALL_FONT);
+		lblAmountRegionsAdded = new JLabel("# Added Regions: " + addedRegions.size());
+		lblAmountRegionsAdded.setFont(SMALL_FONT);
 		final GridBagConstraints gbclblAmountAreasAdded = new GridBagConstraints();
 		gbclblAmountAreasAdded.anchor = GridBagConstraints.CENTER;
 		gbclblAmountAreasAdded.insets = new Insets(0, 5, 5, 5);
 		gbclblAmountAreasAdded.gridx = 0;
 		gbclblAmountAreasAdded.gridy = 1;
 		gbclblAmountAreasAdded.gridwidth = 2;
-		panelSpotOptions.add(lblAmountAreasAdded, gbclblAmountAreasAdded);
+		panelSpotOptions.add(lblAmountRegionsAdded, gbclblAmountAreasAdded);
 
 		/*
 		 * ===========================================
-		 * Panel de Configurar frames
+		 * Set up frames
 		 */
 
-		final JLabel lblConfigFrames = new JLabel("Configurar frames de interes");
+		final JLabel lblConfigFrames = new JLabel("Set up frames of interest");
 		lblConfigFrames.setFont(FONT);
 		final GridBagConstraints gbclblConfigFrames = new GridBagConstraints();
 		gbclblConfigFrames.anchor = GridBagConstraints.NORTH;
@@ -245,7 +246,7 @@ public class FIUBAmateView extends JFrame
 		gblpanelFrameConfig.rowWeights = new double[] { 0.0, 0.0 };
 		panelFrameConfig.setLayout(gblpanelFrameConfig);
 
-		final JLabel lblFirstFrame = new JLabel("Primer frame:");
+		final JLabel lblFirstFrame = new JLabel("First frame:");
 		final GridBagConstraints gbc_lblFirstFrame = new GridBagConstraints();
 		gbc_lblFirstFrame.anchor = GridBagConstraints.EAST;
 		gbc_lblFirstFrame.insets = new Insets(5, 5, 5, 5);
@@ -264,7 +265,7 @@ public class FIUBAmateView extends JFrame
 		gbc_tftFirst.gridy = 0;
 		panelFrameConfig.add(tftFirst, gbc_tftFirst);
 
-		final JLabel lbllastFrame = new JLabel("Ultimo frame:");
+		final JLabel lbllastFrame = new JLabel("Last frame:");
 		final GridBagConstraints gbc_lbllastFrame = new GridBagConstraints();
 		gbc_lbllastFrame.anchor = GridBagConstraints.EAST;
 		gbc_lbllastFrame.insets = new Insets(0, 5, 5, 5);
@@ -283,7 +284,7 @@ public class FIUBAmateView extends JFrame
 		gbc_tftLast.gridy = 1;
 		panelFrameConfig.add(tftLast, gbc_tftLast);
 
-		String s = "Nota: FIUBAmate ignorara los cuerpos que comiencen antes del Primer Frame, o terminen luego del Ultimo Frame.";
+		String s = "Note: FIUBAmate will ignore bodies that starts before 'first frame' or after 'last frame'.";
 		String html = "<html><body style='width: 165px; text-align: center'>";
 		final JLabel lblnotaSobreFrames = new JLabel(html + s);
 		lblnotaSobreFrames.setFont(SMALL_FONT);
@@ -297,57 +298,57 @@ public class FIUBAmateView extends JFrame
 
 		/*
 		 * ===========================================
-		 * Panel de exportar areas
+		 * Export Regions Panel
 		 */
 
-		final JLabel lblExportarInformacion = new JLabel("Exportar estadisticas sobre Areas");
-		lblExportarInformacion.setFont(FONT);
-		final GridBagConstraints gbclblExportarInformacion = new GridBagConstraints();
-		gbclblExportarInformacion.anchor = GridBagConstraints.NORTH;
-		gbclblExportarInformacion.fill = GridBagConstraints.HORIZONTAL;
-		gbclblExportarInformacion.insets = new Insets(5, 5, 0, 5);
-		gbclblExportarInformacion.gridx = 0;
-		gbclblExportarInformacion.gridy = 5;
-		add(lblExportarInformacion, gbclblExportarInformacion);
+		final JLabel lblExportStats = new JLabel("Export Regions stats");
+		lblExportStats.setFont(FONT);
+		final GridBagConstraints gbclblExportStats = new GridBagConstraints();
+		gbclblExportStats.anchor = GridBagConstraints.NORTH;
+		gbclblExportStats.fill = GridBagConstraints.HORIZONTAL;
+		gbclblExportStats.insets = new Insets(5, 5, 0, 5);
+		gbclblExportStats.gridx = 0;
+		gbclblExportStats.gridy = 5;
+		add(lblExportStats, gbclblExportStats);
 
-		final JPanel panelExportarInformacion = new JPanel();
-		panelExportarInformacion.setBorder(new LineBorder(BORDER_COLOR, 1, true));
-		final GridBagConstraints gbcpanelExportarInformacion = new GridBagConstraints();
-		gbcpanelExportarInformacion.gridwidth = 2;
-		gbcpanelExportarInformacion.insets = new Insets(0, 5, 5, 5);
-		gbcpanelExportarInformacion.fill = GridBagConstraints.BOTH;
-		gbcpanelExportarInformacion.gridx = 0;
-		gbcpanelExportarInformacion.gridy = 6;
-		add(panelExportarInformacion, gbcpanelExportarInformacion);
-		final GridBagLayout gblpanelExportarInformacion = new GridBagLayout();
-		gblpanelExportarInformacion.columnWeights = new double[] { 0.0, 0.0 };
-		gblpanelExportarInformacion.rowWeights = new double[] { 0.0, 0.0 };
-		panelExportarInformacion.setLayout(gblpanelExportarInformacion);
+		final JPanel panelExportStats = new JPanel();
+		panelExportStats.setBorder(new LineBorder(BORDER_COLOR, 1, true));
+		final GridBagConstraints gbcpanelExportStats = new GridBagConstraints();
+		gbcpanelExportStats.gridwidth = 2;
+		gbcpanelExportStats.insets = new Insets(0, 5, 5, 5);
+		gbcpanelExportStats.fill = GridBagConstraints.BOTH;
+		gbcpanelExportStats.gridx = 0;
+		gbcpanelExportStats.gridy = 6;
+		add(panelExportStats, gbcpanelExportStats);
+		final GridBagLayout gblpanelExportStats = new GridBagLayout();
+		gblpanelExportStats.columnWeights = new double[] { 0.0, 0.0 };
+		gblpanelExportStats.rowWeights = new double[] { 0.0, 0.0 };
+		panelExportStats.setLayout(gblpanelExportStats);
 
-		btnExportarCSV = new JButton("Exportar a CSV", CSV_ICON);
-		btnExportarCSV.addActionListener(e -> onExportarCSV());
-		btnExportarCSV.setEnabled(false);
-		btnExportarCSV.setToolTipText("Generar CSV con las columnas: ROI ID,cantidad,proporcion");
+		btnExportCSV = new JButton("Export to CSV", CSV_ICON);
+		btnExportCSV.addActionListener(e -> onExportCSV());
+		btnExportCSV.setEnabled(false);
+		btnExportCSV.setToolTipText("Generates CSV with columns: ROI ID,amount,proportion");
 
-		final GridBagConstraints gbcbtnExportarCSV = new GridBagConstraints();
-		gbcbtnExportarCSV.anchor = GridBagConstraints.EAST;
-		gbcbtnExportarCSV.insets = new Insets(5, 5, 5, 2);
-		gbcbtnExportarCSV.gridx = 0;
-		gbcbtnExportarCSV.gridy = 0;
-		panelExportarInformacion.add(btnExportarCSV, gbcbtnExportarCSV);
+		final GridBagConstraints gbcbtnExportCSV = new GridBagConstraints();
+		gbcbtnExportCSV.anchor = GridBagConstraints.EAST;
+		gbcbtnExportCSV.insets = new Insets(5, 5, 5, 2);
+		gbcbtnExportCSV.gridx = 0;
+		gbcbtnExportCSV.gridy = 0;
+		panelExportStats.add(btnExportCSV, gbcbtnExportCSV);
 
-		btnExportarDistribucionTemporalCSV = new JButton("Exportar tiempos a CSV", PLOT_ICON);
-		btnExportarDistribucionTemporalCSV.addActionListener(e -> onExportarDistribucionTemporalCSV());
-		btnExportarDistribucionTemporalCSV.setEnabled(false);
-		btnExportarDistribucionTemporalCSV
-				.setToolTipText("Generar CSV con las columnas: ROI ID,Frame Entrada,Frame Salida,Spot ID");
+		btnExportTemporalDistCSV = new JButton("Export temporal dist to CSV", PLOT_ICON);
+		btnExportTemporalDistCSV.addActionListener(e -> onExportTemporalDistCSV());
+		btnExportTemporalDistCSV.setEnabled(false);
+		btnExportTemporalDistCSV
+				.setToolTipText("Generates CSV with columns: ROI ID,Frame In,Frame Out,Spot ID");
 
-		final GridBagConstraints gbcbtnExportarDistribucionTemporalCSV = new GridBagConstraints();
-		gbcbtnExportarDistribucionTemporalCSV.anchor = GridBagConstraints.WEST;
-		gbcbtnExportarDistribucionTemporalCSV.insets = new Insets(5, 2, 5, 5);
-		gbcbtnExportarDistribucionTemporalCSV.gridx = 1;
-		gbcbtnExportarDistribucionTemporalCSV.gridy = 0;
-		panelExportarInformacion.add(btnExportarDistribucionTemporalCSV, gbcbtnExportarDistribucionTemporalCSV);
+		final GridBagConstraints gbcbtnExportTemporalDistCSV = new GridBagConstraints();
+		gbcbtnExportTemporalDistCSV.anchor = GridBagConstraints.WEST;
+		gbcbtnExportTemporalDistCSV.insets = new Insets(5, 2, 5, 5);
+		gbcbtnExportTemporalDistCSV.gridx = 1;
+		gbcbtnExportTemporalDistCSV.gridy = 0;
+		panelExportStats.add(btnExportTemporalDistCSV, gbcbtnExportTemporalDistCSV);
 
 		final FocusListener fl = new FocusAdapter() {
 			@Override
@@ -371,7 +372,7 @@ public class FIUBAmateView extends JFrame
 
 	public void exportToCsv(List<String[]> stats, String[] header, String selectedFile) {
 		/*
-		 * Recibo la lista de spots que cruzaron cada ROI y la exporto como csv.
+		 * Receives spots that entered each ROI and exports them as CSV.
 		 */
 		final File file = FileChooser.chooseFile(
 				this,
@@ -385,7 +386,7 @@ public class FIUBAmateView extends JFrame
 
 		selectedFile = file.getAbsolutePath();
 
-		// Se escribe el archivo elegido
+		// Write chosen file
 		try (CSVWriter writer = new CSVWriter(new FileWriter(selectedFile),
 				CSVWriter.DEFAULT_SEPARATOR,
 				CSVWriter.NO_QUOTE_CHARACTER,
@@ -434,24 +435,24 @@ public class FIUBAmateView extends JFrame
 	public void roiModified(ImagePlus img, int id) {
 		switch (id) {
 			case CREATED:
-				btnAgregarArea.setEnabled(true);
+				btnAddRegion.setEnabled(true);
 				break;
 			case DELETED:
-				btnAgregarArea.setEnabled(false);
+				btnAddRegion.setEnabled(false);
 				break;
 		}
 	}
 
 	private void updateActionButtons() {
-		int n_added_areas = addedAreas.size();
+		int n_added_areas = addedRegions.size();
 
-		lblAmountAreasAdded.setText("Cantidad de areas agregadas: " + n_added_areas);
-		btnExportarCSV.setEnabled(n_added_areas > 0);
-		btnExportarDistribucionTemporalCSV.setEnabled(n_added_areas > 0);
-		btnRemoverArea.setEnabled(n_added_areas > 0);
+		lblAmountRegionsAdded.setText("# Areas added: " + n_added_areas);
+		btnExportCSV.setEnabled(n_added_areas > 0);
+		btnExportTemporalDistCSV.setEnabled(n_added_areas > 0);
+		btnRemoveRegion.setEnabled(n_added_areas > 0);
 	}
 
-	private void onAgregarArea() {
+	private void onAddRegion() {
 		// IJ.log("Se agrego un ROI");
 		ImagePlus img = IJ.getImage();
 		Roi roi = img.getRoi();
@@ -462,58 +463,58 @@ public class FIUBAmateView extends JFrame
 
 		// IJ.log(roi.getBounds().toString());
 
-		addedAreas.add(roi);
+		addedRegions.add(roi);
 
 		updateActionButtons();
 	}
 
-	private void onRemoverArea() {
+	private void onRemoveRegion() {
 		// IJ.log("Se removio el ultimo ROI");
-		addedAreas.remove(addedAreas.size() - 1);
+		addedRegions.remove(addedRegions.size() - 1);
 		updateActionButtons();
 	}
 
-	private void onExportarCSV() {
+	private void onExportCSV() {
 		/*
-		 * Se itera frame a frame, y se itera por cada spot en ese frame
-		 * Si el centro de dicho spot esta en el ROI, se agrega el punto a una
-		 * estructura de set
-		 * y se calcula el porcentaje de spots que pasaron por el ROI
+		 * Iterate frame to frame, and the for each spot in that frame
+		 * If spot's centre is in the ROI, it adds the spot to a set data structure
+		 * and after the iteration we can calculate proportion of spots that entered the
+		 * ROI
 		 */
 		List<String[]> stats = new ArrayList<String[]>();
 
-		for (int i = 0; i < addedAreas.size(); i++) {
-			stats.add(spotsInROI(addedAreas.get(i), i));
+		for (int i = 0; i < addedRegions.size(); i++) {
+			stats.add(spotsInROI(addedRegions.get(i), i));
 		}
 
 		// IJ.log("Exportando CSV");
-		String[] header = { "ROI ID", "cantidad", "proporcion" };
+		String[] header = { "ROI ID", "amount", "proportion" };
 		exportToCsv(stats, header, csvSelectedFile);
 	}
 
-	private void onExportarDistribucionTemporalCSV() {
+	private void onExportTemporalDistCSV() {
 		/*
-		 * Para cada ROI, se itera frame a frame, y se itera por cada spot en ese frame
-		 * Si el centro de dicho spot esta en el ROI, se actualizan entrada y salida
-		 * del roi para ese spot
+		 * For each ROI, we iterate all the frames, and for each frame we iterate all
+		 * spots
+		 * If spot's center is in the ROI, we update in and out for that ROI and spot in
+		 * particular
 		 */
 		List<String[]> stats = new ArrayList<String[]>();
 
-		for (int i = 0; i < addedAreas.size(); i++) {
-			entradaSalidaROI(addedAreas.get(i), i, stats);
+		for (int i = 0; i < addedRegions.size(); i++) {
+			ROI_IO(addedRegions.get(i), i, stats);
 		}
 
 		// IJ.log("Exportando CSV temporal");
-		String[] header = { "ROI ID", "Frame Entrada", "Frame Salida", "Spot ID" };
-		exportToCsv(stats, header, csvDistribucionTemporalSelectedFile);
+		String[] header = { "ROI ID", "Frame In", "Frame Out", "Spot ID" };
+		exportToCsv(stats, header, csvTemporalDistSelectedFile);
 	}
 
 	private String[] spotsInROI(Roi roi, int roi_index) {
 		/*
-		 * Se itera frame a frame, y se itera por cada spot en ese frame
-		 * Si el centro de dicho spot esta en el ROI, se agrega el punto a una
-		 * estructura de set
-		 * y se calcula el porcentaje de spots que pasaron por el ROI
+		 * For each frame, and for each spot in that frame:
+		 * If spot's center is in the ROI, we add the spot to a set structure
+		 * and in the end calculate the spot proportion that entered that ROI
 		 */
 
 		SpotCollection spotCollection = model.getSpots();
@@ -524,10 +525,10 @@ public class FIUBAmateView extends JFrame
 		// get trackIds from model
 		TrackModel trackModel = model.getTrackModel();
 		Set<Integer> trackIds = trackModel.trackIDs(false);
-		int cantidadTracksValidos = 0; // es menor o igual que trackids.size()
+		int validTracks = 0; // es less that or equal than trackids.size()
 
 		if (spotCollection == null) {
-			// IJ.log("No hay spots\n");
+			// IJ.log("No spots\n");
 			return new String[] { String.valueOf(roi_index), "0", "0.0000" };
 		}
 
@@ -542,7 +543,7 @@ public class FIUBAmateView extends JFrame
 				continue;
 			}
 
-			cantidadTracksValidos++;
+			validTracks++;
 
 			for (Spot spot : sortedTrackSpots) {
 				// get POSITION_X and POSITION_Y from the spot
@@ -557,8 +558,9 @@ public class FIUBAmateView extends JFrame
 			}
 		}
 		// IJ.log("Tracks in ROI " + tracksInRoi.toString());
-		// IJ.log("Se encontraron " + cantidadTracksValidos + " tracks validos ('completos')");
-		float proportion = (float) tracksInRoi.size() / cantidadTracksValidos;
+		// IJ.log("Se encontraron " + cantidadTracksValidos + " tracks validos
+		// ('completos')");
+		float proportion = (float) tracksInRoi.size() / validTracks;
 
 		return new String[] {
 				String.valueOf(roi_index),
@@ -575,12 +577,12 @@ public class FIUBAmateView extends JFrame
 		return firstSpotFrame < this.firstFrame || this.lastFrame < lastSpotFrame;
 	}
 
-	private void entradaSalidaROI(Roi roi, int roi_index, List<String[]> stats) {
+	private void ROI_IO(Roi roi, int roi_index, List<String[]> stats) {
 		/*
-		 * Se itera frame a frame, y se itera por cada spot en ese frame
-		 * Si el centro de dicho spot esta en el ROI, se agrega el punto a una
-		 * estructura de set
-		 * y se calcula el porcentaje de spots que pasaron por el ROI
+		 * Iterate frame to frame, and the for each spot in that frame
+		 * If spot's centre is in the ROI, it adds the spot to a set data structure
+		 * and after the iteration we can calculate proportion of spots that entered the
+		 * ROI
 		 */
 
 		SpotCollection spotCollection = model.getSpots();
@@ -590,15 +592,15 @@ public class FIUBAmateView extends JFrame
 		// get trackIds from model
 		TrackModel trackModel = model.getTrackModel();
 		Set<Integer> trackIds = trackModel.trackIDs(false);
-		int cantidadTracksValidos = 0; // es menor o igual que trackids.size()
+		int validTracks = 0; // is less or equal than trackids.size()
 
 		if (spotCollection == null) {
-			// IJ.log("No hay spots\n");
+			// IJ.log("No spots\n");
 			stats.add(new String[] { String.valueOf(roi_index), "NaN", "NaN" });
 			return;
 		}
 
-		ArrayList<SpotEntradaSalida> spotsInRoi = new ArrayList<SpotEntradaSalida>();
+		ArrayList<SpotIO> spotsInRoi = new ArrayList<SpotIO>();
 
 		for (Integer trackId : trackIds) {
 			// get spots from trackId
@@ -611,9 +613,9 @@ public class FIUBAmateView extends JFrame
 				continue;
 			}
 
-			SpotEntradaSalida spotIO = new SpotEntradaSalida(trackId);
+			SpotIO spotIO = new SpotIO(trackId);
 
-			cantidadTracksValidos++;
+			validTracks++;
 
 			for (Spot spot : sortedTrackSpots) {
 				// get POSITION_X and POSITION_Y from the spot
@@ -630,18 +632,19 @@ public class FIUBAmateView extends JFrame
 
 		}
 		// IJ.log("Tracks in ROI " + spotsInRoi.toString());
-		// IJ.log("Se encontraron " + cantidadTracksValidos + " tracks validos ('completos')");
+		// IJ.log("Se encontraron " + cantidadTracksValidos + " tracks validos
+		// ('completos')");
 
 		Collections.sort(spotsInRoi);
 
-		for (SpotEntradaSalida spot : spotsInRoi) {
-			if (!spot.valido())
+		for (SpotIO spot : spotsInRoi) {
+			if (!spot.valid())
 				continue;
 			stats.add(new String[] {
 					String.valueOf(roi_index),
 					String.valueOf(spot.getTrackID()),
-					String.valueOf(spot.getFrameInicio()),
-					String.valueOf(spot.getFrameFin())
+					String.valueOf(spot.getFrameIn()),
+					String.valueOf(spot.getFrameOut())
 			});
 		}
 	}

@@ -16,11 +16,11 @@ public class LaunchFIUBAmateAction implements TrackMateAction {
 	@Override
 	public void execute(final TrackMate trackmate, final SelectionModel selectionModel,
 			final DisplaySettings displaySettings, final Frame parent) {
-		logger.log("Lanzando FIUBAmate...");
+		logger.log("Starting FIUBAmate...");
 
 		final FIUBAmateView view = new FIUBAmateView(trackmate.getModel(), selectionModel);
 		view.render();
-		logger.log(" Listo!\n");
+		logger.log(" Done!\n");
 	}
 
 	@Override

@@ -15,11 +15,11 @@ import ij.ImagePlus;
 @Plugin(type = TrackMateActionFactory.class)
 public class LaunchFIUBAmateActionFactory implements TrackMateActionFactory {
 
-	private static final String INFO_TEXT = "<html>Esta accion lanza FIUBAmate, un sistema integrado a ImageJ pensado para obtener estadisticas sobre distintos canales y cuerpos en una experiencia dada.</html>";
+	private static final String INFO_TEXT = "<html>This action launches FIUBAmate, an integrated system to ImageJ, designed to obtain statistics about channels and bodies in a given video.</html>";
 
 	private static final String KEY = "LAUNCH_FIUBAMATE";
 
-	private static final String NAME = "Lanzar FIUBAmate";
+	private static final String NAME = "Launch FIUBAmate";
 
 	@Override
 	public String getInfoText() {
